@@ -340,7 +340,7 @@ app.addEventListener('click', ev => {
   document.querySelectorAll('.maptools [data-v]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
 });
 app.addEventListener('keydown', ev => { const c = ev.target.closest && ev.target.closest('.mapsvg .v'); if (c && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); pickCountry(c); } });
-(() => { const m = ['jo.safranek', 'email.cz'].join('@'), a = document.getElementById('mail'); if (a) { a.href = 'mailto:' + m; a.textContent = m; } })();
+(() => { const m = ['aveja', 'slafbir.cz'].join('@'), a = document.getElementById('mail'); if (a) { a.href = 'mailto:' + m; a.textContent = m; } })();
 let current = [];
 function render(){
   const h = location.hash.slice(1);
