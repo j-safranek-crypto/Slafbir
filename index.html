@@ -191,6 +191,7 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
   <div class="brand">Šláfbír</div>
   <p class="contact">Kontakt: <a id="mail" href="#">e-mail</a></p>
   <p>Na většinu expedic jezdím se cestovatelem Slávkem Honzíkem. Fotky u jeho výprav jsou zatím z jeho webu <a href="https://slavekhonzik.cz" target="_blank" rel="noopener">slavekhonzik.cz</a>, postupně je nahradím svými.</p>
+  <p class="label">Web nepoužívá cookies, návštěvnost se počítá anonymně.</p>
 </div></footer>
 
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Fotografie">
@@ -381,5 +382,6 @@ lb.addEventListener('touchstart', ev => tx = ev.touches[0].clientX, {passive:tru
 lb.addEventListener('touchend', ev => { if(tx===null) return; const dx = ev.changedTouches[0].clientX - tx; if(Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1)); tx = null; });
 </script>
 
+<script data-goatcounter="https://slafbir.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
