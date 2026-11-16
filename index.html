@@ -263,7 +263,7 @@ function home(){
         <span class="legend"><span><i style="background:var(--accent)"></i>Navštíveno</span><span><i style="background:var(--stamp-c)"></i>Domov</span></span>
       </div>
       <div class="mapbox">${mapSvg()}${usaSvg()}</div>
-      <div class="mapinfo" id="mapInfo" aria-live="polite"><span class="label">Klepni na vybarvený stát</span></div>
+      <div class="mapinfo" id="mapInfo" aria-live="polite"><span class="label">Klepni na vybarvený stát a otevře se expedice</span></div>
     </div>
     <div class="cont">
       ${D.continents.map(([k,list]) => `<div><h3>${esc(k)}<small>${list.length}</small></h3><ul>${list.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`).join('')}
@@ -335,6 +335,8 @@ function usaSvg(){
 function pickCountry(el){
   document.querySelectorAll('.mapsvg .on').forEach(x => x.classList.remove('on'));
   const st = el.dataset.st, cz = st || el.dataset.cz, key = st ? 'st' : 'cz';
+  const trips = st ? tripsUS[st] : tripsBy[cz];
+  if (trips && trips.length === 1) { location.hash = trips[0].id; return; }
   document.querySelectorAll(`.mapsvg [data-${key}="${CSS.escape(cz)}"]`).forEach(x => x.classList.add('on'));
   document.getElementById('mapInfo').innerHTML = `<b>${esc(cz)}</b>` + (st ? tripsUS[st] : tripsBy[cz]).map(e => `<a href="#${e.id}">${esc(e.name)} ${e.year}</a>`).join('');
 }
@@ -342,11 +344,11 @@ app.addEventListener('click', ev => {
   const c = ev.target.closest('.mapsvg .v'); if (c) { pickCountry(c); return; }
   const ft = ev.target.closest('.maptools [data-fl]');
   if (ft) { const on = ft.getAttribute('aria-pressed') !== 'true'; ft.setAttribute('aria-pressed', String(on)); document.querySelectorAll('.mapsvg').forEach(s => s.classList.toggle('fl', on));
-    document.getElementById('mapInfo').innerHTML = on ? `<span class="label">${flSum()}</span>` : '<span class="label">Klepni na vybarvený stát</span>'; return; }
+    document.getElementById('mapInfo').innerHTML = on ? `<span class="label">${flSum()}</span>` : '<span class="label">Klepni na vybarvený stát a otevře se expedice</span>'; return; }
   const b = ev.target.closest('.maptools [data-v]'); if (!b) return;
   const usa = b.dataset.v === 'usa', svg = document.getElementById('map');
   svg.toggleAttribute('hidden', usa); document.getElementById('mapUsa').toggleAttribute('hidden', !usa);
-  document.getElementById('mapInfo').innerHTML = usa ? `<span class="label">Navštívené státy USA: ${Object.keys(tripsUS).map(esc).join(', ')}</span>` : '<span class="label">Klepni na vybarvený stát</span>';
+  document.getElementById('mapInfo').innerHTML = usa ? `<span class="label">Navštívené státy USA: ${Object.keys(tripsUS).map(esc).join(', ')}</span>` : '<span class="label">Klepni na vybarvený stát a otevře se expedice</span>';
   if (!usa) svg.setAttribute('viewBox', VB[b.dataset.v]);
   svg.querySelectorAll('circle').forEach(ci => ci.setAttribute('r', b.dataset.v === 'eu' ? '1.1' : '2.6'));
   document.querySelectorAll('.maptools [data-v]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
