@@ -62,6 +62,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .stats b{display:block;font-family:var(--display);font-size:2.6rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
 @media (max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}.stats div:nth-child(2){border-right:0}.stats div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
 
+.teaser{margin-top:28px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;padding:18px 20px;border:2px dashed var(--accent);border-radius:3px;background:var(--card)}
+.teaser .stamp{position:static;width:96px;height:96px;color:var(--accent)}
+.teaser .stamp b{font-size:1.5rem}
+.teaser h3{font-size:1.8rem;font-weight:800;margin-bottom:4px}
+.teaser p{margin:0;max-width:42em;min-width:0}
+@media (max-width:520px){.teaser{grid-template-columns:1fr}}
 section.block{padding-block:56px 24px;scroll-margin-top:calc(env(safe-area-inset-top,0px) + 56px)}
 .head{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
 .head h2{font-size:clamp(2.6rem,7vw,4.4rem);font-weight:800}
@@ -229,7 +235,11 @@ function home(){
     <div><b>${nStates}</b><span class="label">států</span></div>
     <div><b>${D.continents.length}</b><span class="label">${D.continents.length<5?'kontinenty':'kontinentů'}</span></div>
     <div><b>${first}–${String(last).slice(2)}</b><span class="label">roky cest</span></div>
-  </div></div>
+  </div>
+  <aside class="teaser" aria-label="Soutěž">
+    <div class="stamp" style="--rot:-6deg" aria-hidden="true"><div><span>Soutěž</span><b>1. 12.</b><span>2026</span></div></div>
+    <div><h3>Soutěž ke spuštění webu</h3><p>Od 1. do 31. prosince 2026 tu poběží soutěž s otázkami o mých cestách. Odpovědi najdete na tomhle webu, nejlepší dostanou drobnosti z cest. Podrobnosti už brzy.</p></div>
+  </aside></div>
 
   <section class="block" id="expedice"><div class="wrap">
     <div class="head"><h2>Expedice</h2><span class="label">Od nejnovější</span></div>
