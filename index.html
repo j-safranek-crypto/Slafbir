@@ -36,6 +36,61 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .label{font-family:var(--mono);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 
+.px .ovl{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.px .lvl{display:flex;gap:4px;flex-wrap:wrap}
+.px .lvl button,.px .btn{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;padding:9px 12px;border-radius:3px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.px .lvl button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+.px .btn.main{border-color:var(--ink);background:var(--ink);color:var(--paper);padding:13px 22px;font-size:.85rem}
+.px .stat{display:flex;gap:18px;font-family:var(--mono);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.px .stat b{font-family:var(--display);font-size:1.6rem;font-weight:800;color:var(--ink);letter-spacing:0;margin-left:4px;font-variant-numeric:tabular-nums}
+
+.px .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.px .card{container-type:inline-size;position:relative;aspect-ratio:1;max-width:100%;border:0;padding:0;background:none;cursor:pointer;perspective:800px;font:inherit;color:inherit}
+.px .card .in{position:absolute;inset:0;transition:transform .45s cubic-bezier(.3,.7,.3,1);transform-style:preserve-3d}
+.px .card.up .in,.px .card.done .in{transform:rotateY(180deg)}
+.px .face{position:absolute;inset:0;border-radius:4px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.px .back{background:var(--card);border:1px solid var(--line);display:grid;place-items:center;
+  background-image:repeating-linear-gradient(135deg,transparent 0 12px,color-mix(in srgb,var(--line) 70%,transparent) 12px 13px)}
+.px .back .st{width:72%;aspect-ratio:1;border-radius:50%;border:2.5px solid currentColor;box-shadow:inset 0 0 0 2px var(--card),inset 0 0 0 4px currentColor;
+  background:var(--card);display:grid;place-items:center;text-align:center;font-family:var(--mono);font-weight:600;text-transform:uppercase;line-height:1;transform:rotate(var(--rot))}
+.px .back .st b{display:block;font-family:var(--display);font-weight:900;font-size:max(.62rem,14cqi);letter-spacing:0;line-height:1.1;padding-top:.08em}
+.px .back .st span{font-size:max(.4rem,6cqi);letter-spacing:.04em}
+.px .back .st > span{max-width:76%}
+.px .back .st.vicko{border:0;box-shadow:none;background:currentColor;clip-path:var(--zuby)}
+.px .back .st.vicko > span{color:var(--card)}
+.px .back .st.vicko > span::before{content:"";position:absolute;inset:13%;border-radius:50%;border:1.5px dashed color-mix(in srgb,var(--card) 60%,transparent)}
+.px .back .st{position:relative}
+.px .front{transform:rotateY(180deg);background:var(--line)}
+.px .front img{display:block;width:100%;height:100%;object-fit:cover}
+.px .front .cap{position:absolute;inset:auto 0 0 0;padding:16px 6px 5px;background:linear-gradient(transparent,rgba(0,0,0,.72));color:#fff;
+  font-family:var(--mono);font-size:clamp(.5rem,1.7vw,.66rem);letter-spacing:.06em;text-transform:uppercase;line-height:1.2;opacity:0;transition:opacity .3s}
+.px .card.done .cap{opacity:1}
+.px .card.done .front{box-shadow:inset 0 0 0 3px var(--stamp-c)}
+.px .card.done{cursor:default}
+.px .card.nope .front{animation:shake .4s}
+@keyframes shake{25%{transform:rotateY(180deg) translateX(-4px)}75%{transform:rotateY(180deg) translateX(4px)}}
+
+.px .found{min-height:3.4em;border-top:1px solid var(--line);padding-top:12px}
+.px .found .label{display:block}
+.px .found p{margin:2px 0 0;font-family:var(--display);font-size:1.6rem;font-weight:800;text-transform:uppercase;line-height:1.05}
+.px .found small{font-family:var(--body);font-size:.95rem;color:var(--muted)}
+
+.px .konec{background:var(--card);border:2px dashed var(--accent);border-radius:3px;padding:20px;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.px .konec .st{width:96px;height:96px;border-radius:50%;border:3px solid currentColor;box-shadow:inset 0 0 0 3px var(--card),inset 0 0 0 5px currentColor;display:grid;place-items:center;text-align:center;
+  font-family:var(--mono);font-weight:600;text-transform:uppercase;line-height:1;color:var(--accent);transform:rotate(-8deg)}
+.px .konec .st b{display:block;font-family:var(--display);font-size:1.9rem;font-weight:900}
+.px .konec .st span{font-size:.6rem;letter-spacing:.08em}
+.px .konec h2{font-size:clamp(1.8rem,6vw,2.6rem);font-weight:800}
+.px .konec p{margin:6px 0 12px;min-width:0}
+.px .konec .rek{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+@media (max-width:520px){.px .konec{grid-template-columns:1fr}.px .grid{gap:7px}.px .lvl button{padding:8px 9px;font-size:.72rem;letter-spacing:.06em}.px .stat{gap:14px}}
+@media (prefers-reduced-motion:reduce){.px .card .in{transition:none}.px .card.nope .front{animation:none}}
+
+.px{padding-block:40px 64px}
+.px .wrap{max-width:760px;display:flex;flex-direction:column;gap:20px}
+.px h1{font-size:clamp(2.8rem,10vw,4.6rem);font-weight:900}
+.px .intro{max-width:52ch;margin:8px 0 0;color:var(--muted)}
+
 /* top bar */
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--paper)}
@@ -124,7 +179,7 @@ section.block{padding-block:56px 24px;scroll-margin-top:calc(env(safe-area-inset
 .mapsvg .lety path{fill:none;stroke:var(--stamp-a);stroke-linecap:round;opacity:.85;vector-effect:non-scaling-stroke;pointer-events:none}
 .mapsvg .lety circle{fill:var(--ink);stroke:var(--card);stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}
 .maptools .fltog{margin-left:6px}
-.flights{margin-top:36px;--board:#14181a;--flap:#22282b;--flap-hi:#2b3236;--seam:#0b0d0e;--amber:#f6c445;--flap-ink:#eef0ea;--board-muted:#8d9a9b;--go:#7fd39b}
+.flights{margin-top:36px;scroll-margin-top:calc(env(safe-area-inset-top,0px) + 64px);--board:#14181a;--flap:#22282b;--flap-hi:#2b3236;--seam:#0b0d0e;--amber:#f6c445;--flap-ink:#eef0ea;--board-muted:#8d9a9b;--go:#7fd39b}
 .flights h3{font-size:2rem;font-weight:800;margin-bottom:6px}
 .flnote{color:var(--muted);font-size:.92rem;max-width:44em;margin:0 0 14px}
 .board{background:var(--board);border-radius:6px;padding:14px 14px 12px;box-shadow:0 10px 30px rgba(0,0,0,.18);color:var(--flap-ink);font-family:var(--mono)}
@@ -203,7 +258,7 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
 <header class="bar"><div class="wrap">
   <a class="brand" href="#">Šláfbír</a>
   <nav class="nav" aria-label="Hlavní menu">
-    <a href="#expedice">Expedice</a><a href="#staty">Státy</a><a href="#album">Fotoalbum</a>
+    <a href="#expedice">Expedice</a><a href="#staty">Státy</a><a href="#album">Fotoalbum</a><a href="#pexeso">Pexeso</a>
   </nav>
 </div></header>
 
@@ -339,7 +394,7 @@ function mapSvg(){
 const kmFmt = n => n.toLocaleString('cs-CZ');
 const flSum = () => `${M.fl.n} letů · přibližně ${kmFmt(Math.round(M.fl.km/100)*100)} km · ${M.fl.ap.length} letišť`;
 function flightsHtml(){
-  return `<div class="flights"><h3>Lety</h3>
+  return `<div class="flights" id="lety"><h3>Lety</h3>
     <p class="flnote">Všechny lety z mých cest, od nejnovějšího. Každý přestup se počítá jako samostatný let. Trasy na mapě ukáže tlačítko ✈ Lety.</p>
     <div class="board" aria-labelledby="tbT">
       <div class="bhead"><div class="t" id="tbT">Odlety <small>Departures</small></div><div class="bclock" id="tbClock" aria-hidden="true">--:--</div></div>
@@ -350,6 +405,157 @@ function flightsHtml(){
     <div class="flnums" id="tbNums"></div>
     <p class="flnote" style="margin-top:12px">Kilometry jsou vzdušnou čarou mezi letišti, skutečné trasy letadel bývají o něco delší. Hodiny ve vzduchu jsou odhad při průměrné rychlosti 800 km/h.</p></div>`;
 }
+function pexesoPage(){
+  return `<section class="px"><div class="wrap">
+  <header>
+    <div class="label">Minihra</div>
+    <h1>Pexeso z cest</h1>
+    <p class="intro">Najdi dvojice fotek z expedic. Když pár sedí, ukáže se, kde byla fotka pořízená. Každá hra míchá jiné fotky.</p>
+  </header>
+
+  <div class="ovl">
+    <div class="lvl" role="group" aria-label="Obtížnost">
+      <button type="button" data-p="6">Lehké · 6</button>
+      <button type="button" data-p="8">Střední · 8</button>
+      <button type="button" data-p="10">Těžké · 10</button>
+    </div>
+    <div class="stat" aria-live="polite"><span>Tahy<b id="tahy">0</b></span><span>Páry<b id="pary">0/8</b></span><span>Čas<b id="cas">0:00</b></span></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="found" aria-live="polite"><span class="label">Naposledy nalezeno</span><p id="fnd">—</p></div>
+
+  <div class="konec" id="konec" hidden>
+    <div class="st"><div><span>Pexeso</span><b id="kT">0</b><span>tahů</span></div></div>
+    <div>
+      <h2 id="kH"></h2>
+      <p id="kP"></p>
+      <p class="rek" id="kR"></p>
+      <button type="button" class="btn main" id="znovu">Hrát znovu</button>
+    </div>
+  </div>
+
+  </div></section>`;
+}
+/* pexeso z cest */
+const PX = (() => {
+const FOTO = [
+  ['egy-01','Egypt','Balonem nad Luxorem','Egypt'],
+  ['egy-11','Egypt','Sloupová síň v Karnaku','Egypt'],
+  ['fil-03','Filipíny','Nártoun filipínský','Filipíny'],
+  ['fil-04','Filipíny','Se žralokem velrybím','Filipíny'],
+  ['fil-15','Filipíny','Kočka na pultu s pečivem','Filipíny'],
+  ['01-01','Rakousko','Hallstatt','Hallstatt'],
+  ['03-07','Slovensko','Hrad Beckov','Biatec'],
+  ['08-07','Irsko','Pravěká mohyla','Ireland'],
+  ['11-09','Omán','Vádí Baní Chálid','Sultánia'],
+  ['11-10','Omán','Poušť','Sultánia'],
+  ['12-05','Mexiko','Chichén Itzá','Maya-Azteca'],
+  ['22-05','Portugalsko','Oceánárium v Lisabonu','Lisabon'],
+  ['23-03','Chile','Valparaíso','Jižní Amerika'],
+  ['27-07','Kuvajt','Kuvajtské věže','Ropné pláně'],
+  ['29-07','Kyrgyzstán','Malý Pamír','Hedvábná stezka'],
+  ['29-09','Kyrgyzstán','Jurta v Pamíru','Hedvábná stezka'],
+  ['30-07','Malta','Pobřeží','Malteca'],
+  ['30-08','Malta','Červená věž','Malteca'],
+  ['31-04','Irák','Lev z Ištařiny brány','Mezopotámie'],
+  ['31-08','Irák','Babylonský palác','Mezopotámie']
+];
+const $ = id => document.getElementById(id);
+const inks = ['ink-a','ink-b','ink-c'];
+// Přípitky ze zemí, kde se na cestách bylo (rub karet: pivní tácek nebo korunkové víčko)
+const NAZDRAVI = [
+  ['Prost','Rakousko'], ['Sláinte','Irsko'], ['Saúde','Portugalsko'], ['Salud','Mexiko'], ['Noroc','Rumunsko'],
+  ['Saħħa','Malta'], ['Mabuhay','Filipíny'], ['Na zdravie','Slovensko'], ['Egészség','Maďarsko'], ['Živjeli','Bosna'],
+  ['Gëzuar','Albánie'], ['Skål','Norsko'], ['Cheers','USA'], ['Na zdrowie','Polsko'], ['Na zdraví','Česko']
+];
+const ZUBY = 'polygon(' + Array.from({length: 42}, (_, i) => { const a = i / 42 * 2 * Math.PI, r = i % 2 ? 46 : 50; return (50 + r * Math.cos(a)).toFixed(1) + '% ' + (50 + r * Math.sin(a)).toFixed(1) + '%'; }).join(',') + ')';
+document.documentElement.style.setProperty('--zuby', ZUBY);
+let rubPoradi = [];
+function rub(n){
+  const [t, z] = rubPoradi[n % rubPoradi.length];
+  const druh = n % 3 === 1 ? 'vicko' : 'tacek';
+  return `<span class="st ${druh} ${inks[Math.floor(n / 3) % 3]}" style="--rot:${((n * 37) % 21) - 10}deg"><span><b>${esc(t)}</b><span>${esc(z)}</span></span></span>`;
+}
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+
+let pairs = 8, deck = [], open = [], lock = false, tahy = 0, nalez = 0, start = 0, tik = null;
+
+function hlaska(t, p){
+  const r = t / p;
+  if (r <= 1.35) return ['Fotografická paměť', 'Na příští expedici tě bereme jako navigátora.'];
+  if (r <= 1.8)  return ['Zkušený cestovatel', 'Pas máš plný razítek a orientuješ se i bez mapy.'];
+  if (r <= 2.4)  return ['Lehký jet lag', 'Chvíli to trvalo, ale do cíle jsi došel.'];
+  return ['Ztracené zavazadlo', 'Došel jsi, jen kufr cestou trochu bloudil. Zkus to znovu.'];
+}
+const fmt = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+
+function nova(){
+  clearInterval(tik); tik = null; start = 0;
+  tahy = 0; nalez = 0; open = []; lock = false;
+  $('tahy').textContent = '0'; $('pary').textContent = '0/' + pairs; $('cas').textContent = '0:00';
+  $('fnd').textContent = '—'; $('konec').hidden = true;
+  document.querySelectorAll('.px .lvl button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.p === pairs)));
+  rubPoradi = shuffle(NAZDRAVI.slice());
+  const vyber = shuffle(FOTO.slice()).slice(0, pairs);
+  deck = shuffle(vyber.flatMap((f, i) => [{f, i}, {f, i}]));
+  $('grid').innerHTML = deck.map((c, n) =>
+    `<button type="button" class="card" data-n="${n}" aria-label="Karta ${n + 1}">
+      <span class="in">
+        <span class="face back">${rub(n)}</span>
+        <span class="face front"><img src="img/pex/${c.f[0]}.jpg" alt="" loading="lazy" decoding="async"><span class="cap">${esc(c.f[1])} · ${esc(c.f[2])}</span></span>
+      </span></button>`).join('');
+}
+
+function klik(e){
+  const el = e.target.closest('.card'); if (!el || lock) return;
+  if (el.classList.contains('up') || el.classList.contains('done')) return;
+  if (!tik) { start = Date.now(); tik = setInterval(() => $('cas').textContent = fmt(Math.round((Date.now() - start) / 1000)), 500); }
+  const n = +el.dataset.n, c = deck[n];
+  el.classList.add('up'); el.setAttribute('aria-label', `Karta ${n + 1}: ${c.f[1]}, ${c.f[2]}`);
+  open.push(el);
+  if (open.length < 2) return;
+  tahy++; $('tahy').textContent = tahy;
+  const [a, b] = open; open = [];
+  if (deck[+a.dataset.n].i === deck[+b.dataset.n].i) {
+    nalez++; $('pary').textContent = nalez + '/' + pairs;
+    [a, b].forEach(x => { x.classList.remove('up'); x.classList.add('done'); x.setAttribute('aria-disabled', 'true'); });
+    $('fnd').innerHTML = `${esc(c.f[1])} · ${esc(c.f[2])}<br><small>Expedice ${esc(c.f[3])}</small>`;
+    if (nalez === pairs) konec();
+  } else {
+    lock = true;
+    setTimeout(() => { [a, b].forEach(x => x.classList.add('nope')); }, 350);
+    setTimeout(() => { [a, b].forEach(x => { x.classList.remove('up', 'nope'); x.setAttribute('aria-label', 'Karta ' + (+x.dataset.n + 1)); }); lock = false; }, 1050);
+  }
+}
+
+function konec(){
+  clearInterval(tik); tik = null;
+  const sek = Math.round((Date.now() - start) / 1000);
+  const [h, p] = hlaska(tahy, pairs);
+  $('kT').textContent = tahy; $('kH').textContent = h;
+  $('kP').textContent = p + ' Čas ' + fmt(sek) + '.';
+  const k = 'pexeso-rekord-' + pairs, rek = store.get(k);
+  let t;
+  if (!rek || tahy < rek.t || (tahy === rek.t && sek < rek.s)) { store.set(k, {t: tahy, s: sek}); t = rek ? 'Nový rekord!' : 'Tvůj první rekord na téhle obtížnosti.'; }
+  else t = `Tvůj rekord: ${rek.t} tahů za ${fmt(rek.s)}`;
+  $('kR').textContent = t;
+  $('konec').hidden = false;
+  $('konec').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest'});
+}
+
+return function init(){
+  $('grid').addEventListener('click', klik);
+  document.querySelector('.px .lvl').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; pairs = +b.dataset.p; nova(); });
+  $('znovu').addEventListener('click', nova);
+  nova();
+};
+})();
 /* odletová tabule */
 const TB = (() => {
   const L = D.lety, R = Math.PI / 180;
@@ -362,13 +568,13 @@ const TB = (() => {
   const NA = 8, STR = Math.ceil(radky.length / NA), ZN = 'ABCDEFGHIJKLMNOPRSTUVZ0123456789';
   let str = 0, anim = [], videno = false, hodiny = null;
   const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function preklop(el, cil, d, s){
+  function preklop(el, cil, d, s, A = anim){
     const T = String(cil).toUpperCase();
     if (!s || reduce()) { el.textContent = T; return; }
     const n = 6 + Math.floor(Math.random() * 6); let k = 0;
-    anim.push(setTimeout(function krok(){ k++;
+    A.push(setTimeout(function krok(){ k++;
       el.textContent = k >= n ? T : T.split('').map((c, i) => c === ' ' || i < (k / n) * T.length - 1 ? c : ZN[Math.floor(Math.random() * ZN.length)]).join('');
-      if (k < n) anim.push(setTimeout(krok, 55)); }, d));
+      if (k < n) A.push(setTimeout(krok, 55)); }, d));
   }
   function ukaz(s){
     const rows = document.getElementById('tbRows'); if (!rows) return;
@@ -445,6 +651,7 @@ function render(){
   const h = location.hash.slice(1);
   const e = D.exp.find(x=>x.id===h);
   if(e){ app.innerHTML = detail(h); current = pics(e); window.scrollTo(0,0); }
+  else if(h === 'pexeso'){ app.innerHTML = pexesoPage(); current = []; PX(); window.scrollTo(0,0); }
   else {
     app.innerHTML = home(); current = D.album; TB();
     if(h){ const t = document.getElementById(h); if(t) t.scrollIntoView(); } else window.scrollTo(0,0);
