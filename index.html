@@ -186,6 +186,11 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .partneri{padding-block:40px 24px}
 .partneri h1{font-size:clamp(2.8rem,10vw,4.6rem);font-weight:900}
 .partneri .intro{max-width:56ch;margin:8px 0 28px;color:var(--muted)}
+.kontakt .kbox{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:20px;max-width:520px;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.kontakt .kbox p{margin:0}
+.kontakt .kmail{font-family:var(--mono);font-size:clamp(1rem,4.4vw,1.35rem);color:var(--ink);word-break:break-all}
+.kontakt .btn-k{font-family:var(--mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;border-radius:3px;border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.kontakt .kpoz{font-size:.92rem;color:var(--muted);min-height:1.3em}
 .partner{display:grid;grid-template-columns:150px minmax(0,1fr);gap:22px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:20px;margin-bottom:16px}
 .partner .logo{display:grid;place-items:center;background:#fff;border-radius:3px;padding:10px;aspect-ratio:1}
 .partner .logo img{max-width:100%;max-height:130px;width:auto;height:auto;display:block}
@@ -521,6 +526,7 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
   <p class="label">Web nepoužívá cookies, návštěvnost se počítá anonymně.</p>
   <nav class="podnav" aria-label="Další stránky">
     <a href="#partneri">Partneři</a>
+    <a href="#kontakt">Kontakt</a>
     <button type="button" class="zvuk" id="zvukPata">Zvuk tabulí: vyp</button>
     <a class="nahoru" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Nahoru ↑</a>
   </nav>
@@ -1249,6 +1255,25 @@ function partneriPage(){
     </article>
   </div></section>`;
 }
+function kontaktPage(){
+  return `<section class="partneri kontakt"><div class="wrap">
+    <div class="label">Napište mi</div>
+    <h1>Kontakt</h1>
+    <p class="intro">Máte dotaz k některé výpravě, tip, kam se vydat příště, nebo jste na webu našli chybu? Budu rád za zprávu.</p>
+    <div class="kbox">
+      <span class="label">E-mail</span>
+      <p><a id="mailK" class="kmail" href="#">e-mail</a></p>
+      <button type="button" class="btn-k" id="mailKop">Zkopírovat adresu</button>
+      <p class="kpoz" id="mailKopOk" aria-live="polite"></p>
+    </div>
+  </div></section>`;
+}
+function kontaktInit(){
+  mailDo(document.getElementById('mailK'));
+  const b = document.getElementById('mailKop'), ok = document.getElementById('mailKopOk');
+  b.onclick = () => { const hot = () => { ok.textContent = 'Adresa je zkopírovaná.'; };
+    try { navigator.clipboard.writeText(MAIL()).then(hot, () => { ok.textContent = 'Kopírování nejde, adresu označ a zkopíruj ručně.'; }); } catch(e) { ok.textContent = 'Kopírování nejde, adresu označ a zkopíruj ručně.'; } };
+}
 /* lukostřelba */
 const LK_KEY = 'slafbir-lukostrelba-odemceno';
 // odemčení platí do konce týdne, v pondělí (místního času) se skryté fotky znovu zamknou
@@ -1675,7 +1700,10 @@ app.addEventListener('click', ev => {
   document.querySelectorAll('.maptools [data-v]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
 });
 app.addEventListener('keydown', ev => { const c = ev.target.closest && ev.target.closest('.mapsvg .v'); if (c && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); pickCountry(c); } });
-(() => { const m = ['aveja', 'slafbir.cz'].join('@'), a = document.getElementById('mail'); if (a) { a.href = 'mailto:' + m; a.textContent = m; } })();
+// e-mail se skládá až v prohlížeči, ať ho nesbírají roboti na spam
+const MAIL = () => ['j-safranek', 'email.cz'].join('@');
+const mailDo = a => { if (a) { a.href = 'mailto:' + MAIL(); a.textContent = MAIL(); } };
+mailDo(document.getElementById('mail'));
 let current = [];
 function render(){
   const h = location.hash.slice(1);
@@ -1683,6 +1711,7 @@ function render(){
   if(e){ app.innerHTML = detail(h); current = pics(e); window.scrollTo(0,0); vlakExpedice(e); letMapa(e); }
   else if(h === 'pexeso'){ app.innerHTML = pexesoPage(); current = []; PX(); window.scrollTo(0,0); }
   else if(h === 'partneri'){ app.innerHTML = partneriPage(); current = []; window.scrollTo(0,0); }
+  else if(h === 'kontakt'){ app.innerHTML = kontaktPage(); current = []; kontaktInit(); window.scrollTo(0,0); }
   else if(h === 'lukostrelba'){ app.innerHTML = lukPage(); current = []; LK(); window.scrollTo(0,0); }
   else if(h === 'expedice'){ app.innerHTML = expedicePage(); current = []; window.scrollTo(0,0); }
   else if(h === 'staty' || h === 'lety'){ app.innerHTML = statyPage(); current = []; TB(); if (matchMedia('(prefers-reduced-motion: reduce)').matches) VLAK();
