@@ -102,11 +102,39 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .lk .pozn{font-size:.92rem;color:var(--muted);max-width:70ch;border-top:1px solid var(--line);padding-top:16px;margin:8px 0 0}
 .lk .stat{display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);align-items:baseline}
 .lk .stat b{font-family:var(--display);font-size:1.7rem;font-weight:800;color:var(--ink);letter-spacing:0;margin-left:4px;font-variant-numeric:tabular-nums}
-.lk .sipy{display:flex;gap:6px}
-.lk .sipy i{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-style:normal;font-family:var(--mono);font-size:.62rem;color:var(--ink)}
-.lk .sipy i.ted{border-color:var(--ink)}
-.lk .sipy i.hot{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-
+.lk .sipy{display:flex;gap:4px;align-items:flex-end}
+.lk .sipy .pl{display:flex;flex-direction:column;align-items:center;gap:1px;width:26px;--h:0;opacity:.55;transition:opacity .3s}
+.lk .sipy .pl svg{width:24px;height:31px;display:block;overflow:visible}
+.lk .sipy .pl.pan svg{width:17px;height:25px;margin-left:4px}
+.lk .sipy .pl.pan{width:24px}
+.lk .sipy .pl small{font-family:var(--mono);font-size:.62rem;line-height:1;color:var(--ink);min-height:1em;letter-spacing:0}
+.lk .sipy .pl.hot,.lk .sipy .pl.ted{opacity:1}
+.lk .sipy .pl.ted small{border-bottom:2px solid var(--accent);min-width:16px}
+.lk .sipy .pv{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(var(--h));transition:transform 1s cubic-bezier(.3,.7,.4,1)}
+.lk .sipy .pena{transform-box:fill-box;transform-origin:50% 100%;transform:translateY(calc((1 - var(--h)) * 19px));opacity:0;transition:transform 1s cubic-bezier(.3,.7,.4,1),opacity .4s}
+.lk .sipy .hot .pena{opacity:1}
+.lk .sipy .pl.plny .pena{transform:scale(1.15)}
+@media (max-width:420px){.lk .sipy .pl{width:22px}.lk .sipy .pl svg{width:20px;height:26px}.lk .sipy .pl.pan svg{width:15px;height:22px}}
+.lk .zel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.lk .zel h2{font-size:clamp(1.8rem,6vw,2.4rem);font-weight:800;margin:0;color:#2a8a49}
+.lk .zel-hl p{margin:4px 0 0;color:var(--muted);max-width:60ch}
+.lk .zel-f{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:720px}
+.lk .zf{position:relative;display:flex;flex-direction:column;padding:0;border:2px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);cursor:pointer;overflow:hidden;text-align:left;min-width:0}
+.lk .zf img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;max-width:100%}
+.lk .zf b{position:absolute;left:6px;top:6px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.8rem}
+.lk .zf span{padding:7px 8px;font-size:.85rem;line-height:1.25;min-height:2.6em;color:var(--muted)}
+.lk .zf.ma span{color:var(--ink);font-weight:600}
+.lk .zf.vyb{border-color:#2a8a49;box-shadow:0 0 0 2px #2a8a49}
+.lk .zf.ok{border-color:#2a8a49}.lk .zf.ok span{color:#2a8a49}
+.lk .zf.ne{border-color:var(--accent)}.lk .zf.ne span{color:var(--accent)}
+.lk .zel-m{display:flex;flex-wrap:wrap;gap:8px}
+.lk .zm{display:inline-flex;align-items:center;gap:8px;font:inherit;font-size:.95rem;padding:9px 12px;border-radius:3px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left}
+.lk .zm b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.75rem;flex:none}
+.lk .zm.ma{border-color:var(--ink)}
+.lk .zm:disabled,.lk .zf:disabled{cursor:default}
+.lk .zel-v{margin:0;font-weight:600;min-height:1.4em}
+.lk .konec .z7{margin:0 0 6px;font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:#2a8a49}
+@media (max-width:560px){.lk .zf span{font-size:.75rem;padding:5px 6px}.lk .zel-f{gap:6px}}
 .lk .hra{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
 @media (max-width:820px){.lk .hra{grid-template-columns:1fr}}
 .lk .foto{background:var(--card);border:1px solid var(--line);border-radius:4px;overflow:hidden}
@@ -1188,14 +1216,14 @@ function lukPage(){
   <header>
     <div class="label">Minihra</div>
     <h1>Lukostřelba</h1>
-    <p class="intro">Kde byla fotka pořízená? Klepni do mapy, ta se přiblíží. Pak zamiř přesně a vystřel. Čím blíž trefíš, tím víc bodů: střed terče je za 10.</p>
-    <p class="lkcil" id="lkCil">${odem ? `Skryté fotky v albech máš tento týden odemčené. V pondělí se zase zamknou. Hraj dál o rekord.` : `V albech expedic je ${n} skrytých fotek. Získej aspoň <b>30 z 60 bodů</b> a všechny se ti do konce týdne odkryjí. Každé pondělí se zase zamknou. Polovinu terčů tvoří právě ony.`}</p>
+    <p class="intro">Kde byla fotka pořízená? Klepni do mapy, ta se přiblíží. Pak zamiř přesně a vystřel. Čím blíž trefíš, tím víc bodů: střed terče je za 10. Kdo nastřílí aspoň 30 bodů, jde ještě na zelenou.</p>
+    <p class="lkcil" id="lkCil">${odem ? `Skryté fotky v albech máš tento týden odemčené. V pondělí se zase zamknou. Hraj dál o rekord.` : `V albech expedic je ${n} skrytých fotek. Získej aspoň <b>50 ze 100 bodů</b> a všechny se ti do konce týdne odkryjí. Každé pondělí se zase zamknou. Ze sedmi terčů jsou čtyři právě skryté fotky.`}</p>
   </header>
   <div class="stat" aria-live="polite">
     <span class="sipy" id="sipy" aria-hidden="true"></span>
-    <span>Šíp<b id="cislo">1/6</b></span><span>Body<b id="body">0</b></span>
+    <span id="cisloL">Šíp<b id="cislo">1/7</b></span><span>Body<b id="body">0</b></span>
   </div>
-  <div class="hra">
+  <div class="hra" id="lkHra">
     <figure class="foto">
       <img id="lkImg" alt="Fotka z cesty – kde byla pořízená?">
       <figcaption class="q" id="q">Kde to je?</figcaption>
@@ -1217,12 +1245,19 @@ function lukPage(){
     </div>
   </div>
   <div class="vys" id="vys" hidden aria-live="polite"><div class="bod" id="vB">0</div><p><span class="m" id="vM"></span><br><small id="vS"></small></p></div>
+  <div class="zel" id="zel" hidden>
+    <div class="zel-hl"><h2>Na zelenou</h2><p>Bonus: přiřaď ke třem fotkám správné místo. Klepni na fotku a pak na místo. Každý správný pár je za 10 bodů.</p></div>
+    <div class="zel-f" id="zelF"></div>
+    <div class="zel-m" id="zelM"></div>
+    <div class="akce"><button type="button" class="btn main" id="zelOk" disabled>Vyhodnotit</button><button type="button" class="btn main" id="zelDal" hidden>Výsledek</button></div>
+    <p class="zel-v" id="zelV" aria-live="polite"></p>
+  </div>
   <div class="konec" id="lkKonec" hidden>
-    <div class="st"><div><span>Terč</span><b id="kB">0</b><span>z 60</span></div></div>
-    <div><h2 id="kH"></h2><p id="kP"></p><p class="odem" id="kO" hidden></p><ol id="kL"></ol><p class="rek" id="kR"></p>
+    <div class="st"><div><span>Terč</span><b id="kB">0</b><span>ze 100</span></div></div>
+    <div><h2 id="kH"></h2><p id="kP"></p><p class="z7" id="kZ"></p><p class="odem" id="kO" hidden></p><ol id="kL"></ol><p class="rek" id="kR"></p>
       <button type="button" class="btn main" id="znovu">Hrát znovu</button></div>
   </div>
-  <p class="pozn">Body podle vzdálenosti: do 50 km 10, do 150 km 9, do 300 km 8, do 500 km 7, do 750 km 6, do 1 000 km 5, do 1 500 km 4, do 2 000 km 3, do 3 000 km 2, do 5 000 km 1. Nápověda ubere 2 body. Odemčení platí do neděle a pamatuje si ho jen tvůj prohlížeč, stejně jako rekord.</p>
+  <p class="pozn">Body podle vzdálenosti: do 50 km 10, do 150 km 9, do 300 km 8, do 500 km 7, do 750 km 6, do 1 000 km 5, do 1 500 km 4, do 2 000 km 3, do 3 000 km 2, do 5 000 km 1. Nápověda ubere 2 body. Kdo nastřílí aspoň 30 bodů, hraje bonus na zelenou: za každý správně přiřazený pár fotky a místa 10 bodů, dohromady tedy až 100 bodů. Odemčení platí do neděle a pamatuje si ho jen tvůj prohlížeč, stejně jako rekord.</p>
   </div></section>`;
 }
 const LK = (() => {
@@ -1242,7 +1277,7 @@ const LK = (() => {
   const KRUHY = [50, 150, 300, 500, 750, 1000, 1500, 2000, 3000, 5000];
   const body = d => { const i = KRUHY.findIndex(r => d <= r); return i < 0 ? 0 : 10 - i; };
   const BARVY = ['var(--t-white)','var(--t-white)','var(--t-black)','var(--t-black)','var(--t-blue)','var(--t-blue)','var(--t-red)','var(--t-red)','var(--t-gold)','var(--t-gold)'];
-  const PXKM = K * 1.007226 / 6371, N = 6, LIMIT = 30, FULL = [0, 0, 1000, 437];
+  const PXKM = K * 1.007226 / 6371, N = 7, LIMIT = 50, ZEL_OD = 30, FULL = [0, 0, 1000, 437], REK = 'slafbir-lukostrelba-rekord100';
   let svg, vb = FULL.slice(), animId = 0, kolo = [], i = 0, soucet = 0, mir = null, hotovo = false, vysledky = [], napoveda = false;
   const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   function setVB(v){ vb = v; svg.setAttribute('viewBox', v.map(n => n.toFixed(2)).join(' ')); }
@@ -1252,16 +1287,36 @@ const LK = (() => {
     animId = requestAnimationFrame(step); }
   function okno(cx, cy, w){ w = Math.min(1000, w); const h = w * 437 / 1000; return [Math.max(0, Math.min(1000 - w, cx - w / 2)), Math.max(0, Math.min(437 - h, cy - h / 2)), w, h]; }
   function svgBod(ev){ const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY; const p = pt.matrixTransform(svg.getScreenCTM().inverse()); return [p.x, p.y]; }
-  function sipy(){ $('sipy').innerHTML = Array.from({length: N}, (_, k) => `<i class="${k < vysledky.length ? 'hot' : k === i ? 'ted' : ''}">${k < vysledky.length ? vysledky[k].b : ''}</i>`).join(''); }
+  // sedm půllitrů (plní se podle bodů) a panák zelené (bonus)
+  const PUL = `<svg viewBox="0 0 26 34" aria-hidden="true"><path d="M18 10h3.2a3 3 0 0 1 3 3v8.5a3 3 0 0 1-3 3H18" fill="none" stroke="#b9c9cc" stroke-width="2.6"/>
+    <path d="M2.5 7.5h16.5l-1.3 23.6a2 2 0 0 1-2 1.9H5.8a2 2 0 0 1-2-1.9z" fill="rgba(235,245,247,.55)" stroke="#a9bcc0" stroke-width="1.2"/>
+    <g class="pv"><path d="M3.6 11.5h14.3l-1.1 19.4a1.4 1.4 0 0 1-1.4 1.3H6.1a1.4 1.4 0 0 1-1.4-1.3z" fill="#f0a21a"/><path d="M6.2 13h2.2l-.4 17.4H6.9z" fill="#ffd36b" opacity=".55"/></g>
+    <path class="pena" d="M2.2 10.6c-1.6-3 1.2-5.6 3.6-4.4C6.4 3 10.6 2.4 12 4.9c1.9-2.2 5.6-1 5.5 2 2.5.1 3.3 3.3 1.3 4.6-.4 1.1-1.6 1.4-2.6.9-.9 1-2.4 1-3.2.2-1 .9-2.8.9-3.7-.1-1 .8-2.6.6-3.2-.4-1.2.6-3.1.2-3.9-1.5z" fill="#fffaf0" stroke="#efe3c8" stroke-width=".6"/></svg>`;
+  const PAN = `<svg viewBox="0 0 20 30" aria-hidden="true"><g class="pv"><path d="M3.9 10h12.2l-1.1 15.6a1.2 1.2 0 0 1-1.2 1.1H6.2a1.2 1.2 0 0 1-1.2-1.1z" fill="#2fae57"/><path d="M6 11.5h1.6l-.3 13.6H6.8z" fill="#9be3a8" opacity=".6"/></g>
+    <path d="M2.6 6.5h14.8l-1.5 21.3a1.8 1.8 0 0 1-1.8 1.7H5.9a1.8 1.8 0 0 1-1.8-1.7z" fill="rgba(235,245,247,.45)" stroke="#a9bcc0" stroke-width="1.2"/><path d="M4.4 27.2h11.2" stroke="#a9bcc0" stroke-width="2.2"/></svg>`;
+  let zelena = null;   // null = nehráno, jinak počet správných párů
+  function sipy(){
+    const box = $('sipy');
+    if (!box.children.length) box.innerHTML = Array.from({length: N}, () => `<span class="pl">${PUL}<small></small></span>`).join('') + `<span class="pl pan" title="Zelená">${PAN}<small></small></span>`;
+    [...box.children].forEach((el, k) => {
+      if (k === N) { const h = zelena == null ? 0 : zelena === 3 ? 1 : zelena === 2 ? .5 : 0;
+        el.style.setProperty('--h', h); el.classList.toggle('ted', zelena == null && vysledky.length === N && !$('zel').hidden); el.classList.toggle('hot', zelena != null);
+        el.querySelector('small').textContent = zelena == null ? '' : '+' + zelena * 10; return; }
+      const v = vysledky[k], h = v ? v.b / 10 : 0;
+      el.style.setProperty('--h', h); el.classList.toggle('plny', !!v && v.b === 10); el.classList.toggle('hot', !!v); el.classList.toggle('ted', !v && k === i);
+      el.querySelector('small').textContent = v ? v.b : '';
+    });
+  }
   function nova(){
     const vyb = [], exp = new Set();
     const ber = (pool, kolik) => { for (const m of shuffle(pool.slice())) { if (kolik <= 0) break; if (!exp.has(m[5])) { vyb.push(m); exp.add(m[5]); kolik--; } } };
     const skr = MISTA.filter(m => SK.has(m[0])), vid = MISTA.filter(m => !SK.has(m[0]));
-    ber(skr, 3);
+    ber(skr, 4);
     if (!vyb.some(m => m[7])) ber(vid.filter(m => m[7]), 1);   // aspoň jedna moje fotka
     ber(vid, N - vyb.length);
-    kolo = shuffle(vyb); i = 0; soucet = 0; vysledky = [];
-    $('lkKonec').hidden = true; $('body').textContent = '0';
+    kolo = shuffle(vyb); i = 0; soucet = 0; vysledky = []; zelena = null;
+    $('lkKonec').hidden = true; $('zel').hidden = true; $('lkHra').hidden = false; $('body').textContent = '0'; $('sipy').innerHTML = '';
+    $('cisloL').firstChild.textContent = 'Šíp';
     kolo.forEach(m => { const im = new Image(); im.src = `img/${m[0]}.jpg`; });
     sip();
   }
@@ -1298,18 +1353,53 @@ const LK = (() => {
     $('q').textContent = `${m[1]} · ${m[2]}`;
     $('vys').hidden = false; $('hint').hidden = true; $('body').textContent = soucet;
     $('strel').hidden = true; $('svet').hidden = true; $('nap').hidden = true;
-    $('dal').hidden = false; $('dal').textContent = i === N - 1 ? 'Výsledek' : 'Další šíp';
+    $('dal').hidden = false; $('dal').textContent = i < N - 1 ? 'Další šíp' : soucet >= ZEL_OD ? 'Na zelenou' : 'Výsledek';
     sipy(); $('dal').focus({preventScroll: true});
   }
   function hlaska(s){
-    if (s >= 54) return ['Robin Hood', 'Trefuješ se i se zavřenýma očima.'];
-    if (s >= 42) return ['Ostrostřelec', 'Na mapě se vyznáš líp než leckterý průvodce.'];
-    if (s >= 30) return ['Dobrá muška', 'Občas to uletělo, ale směr držíš.'];
-    if (s >= 18) return ['Zatoulaný šíp', 'Svět je velký. Zkus to znovu.'];
+    if (s >= 88) return ['Robin Hood', 'Trefuješ se i se zavřenýma očima.'];
+    if (s >= 70) return ['Ostrostřelec', 'Na mapě se vyznáš líp než leckterý průvodce.'];
+    if (s >= 50) return ['Dobrá muška', 'Občas to uletělo, ale směr držíš.'];
+    if (s >= 30) return ['Zatoulaný šíp', 'Svět je velký. Zkus to znovu.'];
     return ['Šíp v toulci', 'Možná příště radši pexeso?'];
+  }
+  function naZelenou(){
+    const pouzite = new Set(kolo.map(m => m[0])), exp = new Set(kolo.map(m => m[5])), vyb = [], misto = new Set();
+    for (const m of shuffle(MISTA.slice())) { if (vyb.length === 3) break;
+      const nazev = `${m[2]}, ${m[1]}`;
+      if (pouzite.has(m[0]) || misto.has(nazev) || vyb.some(v => v[5] === m[5])) continue;
+      if (SK.has(m[0]) && !odemceno()) continue;   // v bonusu jen fotky, které už jsou vidět
+      vyb.push(m); misto.add(nazev); }
+    const mista = shuffle(vyb.map((m, k) => k)), par = [null, null, null];
+    let vybrana = null;
+    $('lkHra').hidden = true; $('vys').hidden = true; $('dal').hidden = true; $('zel').hidden = false;
+    $('cisloL').firstChild.textContent = 'Zelená'; $('cislo').textContent = '0/3'; $('zelOk').hidden = false; $('zelOk').disabled = true; $('zelDal').hidden = true; $('zelV').textContent = '';
+    const kresli = () => {
+      $('zelF').innerHTML = vyb.map((m, k) => `<button type="button" class="zf${vybrana === k ? ' vyb' : ''}${par[k] != null ? ' ma' : ''}" data-k="${k}" aria-pressed="${vybrana === k}"><img src="img/${m[0]}.jpg" alt="Fotka ${k + 1}"><b>${k + 1}</b><span>${par[k] != null ? esc(`${vyb[par[k]][2]}, ${vyb[par[k]][1]}`) : 'Vyber místo'}</span></button>`).join('');
+      $('zelM').innerHTML = mista.map(j => { const k = par.indexOf(j); return `<button type="button" class="zm${k >= 0 ? ' ma' : ''}" data-j="${j}">${k >= 0 ? `<b>${k + 1}</b>` : ''}${esc(`${vyb[j][2]}, ${vyb[j][1]}`)}</button>`; }).join('');
+      $('cislo').textContent = par.filter(x => x != null).length + '/3';
+      $('zelOk').disabled = par.some(x => x == null);
+    };
+    $('zelF').onclick = ev => { const b = ev.target.closest('.zf'); if (!b || zelena != null) return; const k = +b.dataset.k;
+      if (par[k] != null && vybrana !== k) { par[k] = null; vybrana = k; } else vybrana = vybrana === k ? null : k; kresli(); };
+    $('zelM').onclick = ev => { const b = ev.target.closest('.zm'); if (!b || zelena != null) return; const j = +b.dataset.j;
+      const k = vybrana != null ? vybrana : par.indexOf(null); if (k < 0) return;
+      const uz = par.indexOf(j); if (uz >= 0) par[uz] = null; par[k] = j;
+      vybrana = par.indexOf(null) >= 0 ? par.indexOf(null) : null; kresli(); };
+    $('zelOk').onclick = () => {
+      zelena = par.filter((j, k) => j === k).length; soucet += zelena * 10; $('body').textContent = soucet;
+      [...$('zelF').children].forEach((b, k) => { const ok = par[k] === k; b.classList.add(ok ? 'ok' : 'ne'); b.querySelector('span').textContent = ok ? `${vyb[k][2]}, ${vyb[k][1]} ✓` : `Správně: ${vyb[k][2]}, ${vyb[k][1]}`; b.disabled = true; });
+      [...$('zelM').children].forEach(b => b.disabled = true);
+      $('zelV').textContent = zelena === 3 ? 'Všechny tři! Panák je plný, +30 bodů.' : zelena === 2 ? 'Dva páry ze tří, půlka panáka, +20 bodů.' : zelena === 1 ? 'Jeden pár, +10 bodů. Na panáka to nestačí.' : 'Tentokrát nic, panák zůstal prázdný.';
+      $('zelOk').hidden = true; $('zelDal').hidden = false; sipy(); $('zelDal').focus({preventScroll: true});
+    };
+    $('zelDal').onclick = () => { $('zel').hidden = true; konec(); };
+    vybrana = 0; kresli(); sipy();
+    window.scrollTo({top: $('sipy').getBoundingClientRect().top + scrollY - ((document.querySelector('.bar') || {}).offsetHeight || 0) - 16, behavior: reduce() ? 'auto' : 'smooth'});
   }
   function konec(){
     const [h, p] = hlaska(soucet), uz = odemceno();
+    $('kZ').textContent = zelena === 3 ? 'Dal sis 7 piv a 1 zelenou.' : zelena === 2 ? 'Sedm piv a půlka zelené.' : zelena != null ? 'Sedm piv, zelená tentokrát nevyšla.' : `Na zelenou je potřeba aspoň ${ZEL_OD} bodů ze střelby.`;
     $('kB').textContent = soucet; $('kH').textContent = h; $('kP').textContent = p;
     const o = $('kO'); o.hidden = false;
     if (soucet >= LIMIT && !uz) { try { localStorage.setItem(LK_KEY, tyden()); } catch(e){}
@@ -1317,9 +1407,9 @@ const LK = (() => {
       $('lkCil').textContent = 'Skryté fotky v albech máš tento týden odemčené. V pondělí se zase zamknou. Hraj dál o rekord.'; }
     else if (uz) o.textContent = 'Skryté fotky už máš tento týden odemčené.';
     else o.textContent = `Na odemčení skrytých fotek chybělo ${LIMIT - soucet} ${LIMIT - soucet === 1 ? 'bod' : LIMIT - soucet < 5 ? 'body' : 'bodů'}. Zkus to znovu.`;
-    $('kL').innerHTML = vysledky.map(v => `<li>${esc(v.m[1])} · ${esc(v.m[2])}: <strong>${v.b}</strong> (${Math.round(v.d).toLocaleString('cs-CZ')} km${v.n ? ', s nápovědou' : ''})</li>`).join('');
-    let rek = null; try { rek = JSON.parse(localStorage.getItem('slafbir-lukostrelba-rekord')); } catch(e){}
-    let t; if (rek == null || soucet > rek) { try { localStorage.setItem('slafbir-lukostrelba-rekord', JSON.stringify(soucet)); } catch(e){} t = rek == null ? 'Tvůj první rekord.' : 'Nový rekord!'; } else t = `Tvůj rekord: ${rek} bodů`;
+    $('kL').innerHTML = vysledky.map(v => `<li>${esc(v.m[1])} · ${esc(v.m[2])}: <strong>${v.b}</strong> (${Math.round(v.d).toLocaleString('cs-CZ')} km${v.n ? ', s nápovědou' : ''})</li>`).join('') + (zelena != null ? `<li>Zelená: ${zelena} ze 3 párů: <strong>${zelena * 10}</strong></li>` : '');
+    let rek = null; try { rek = JSON.parse(localStorage.getItem(REK)); } catch(e){}
+    let t; if (rek == null || soucet > rek) { try { localStorage.setItem(REK, JSON.stringify(soucet)); } catch(e){} t = rek == null ? 'Tvůj první rekord.' : 'Nový rekord!'; } else t = `Tvůj rekord: ${rek} bodů`;
     $('kR').textContent = t; $('lkKonec').hidden = false; $('dal').hidden = true;
     $('lkKonec').scrollIntoView({behavior: reduce() ? 'auto' : 'smooth', block: 'center'});
   }
@@ -1330,7 +1420,7 @@ const LK = (() => {
     $('strel').addEventListener('click', strel);
     $('svet').addEventListener('click', () => { zoomTo(FULL.slice()); $('hint').textContent = 'Klepni do oblasti a přiblíží se'; });
     $('nap').addEventListener('click', () => { if (hotovo || napoveda) return; napoveda = true; $('napT').textContent = kolo[i][6]; $('napT').hidden = false; $('nap').disabled = true; });
-    $('dal').addEventListener('click', () => { if (i < N - 1) { i++; sip(); window.scrollTo({top: $('sipy').getBoundingClientRect().top + scrollY - 80, behavior: reduce() ? 'auto' : 'smooth'}); } else konec(); });
+    $('dal').addEventListener('click', () => { if (i < N - 1) { i++; sip(); window.scrollTo({top: $('sipy').getBoundingClientRect().top + scrollY - ((document.querySelector('.bar') || {}).offsetHeight || 0) - 16, behavior: reduce() ? 'auto' : 'smooth'}); } else if (soucet >= ZEL_OD) naZelenou(); else konec(); });
     $('znovu').addEventListener('click', () => { nova(); window.scrollTo({top: 0, behavior: reduce() ? 'auto' : 'smooth'}); });
     nova();
   };
