@@ -223,6 +223,28 @@ fl-c.fl{animation:flipch .1s linear}
 .vlak.tah{cursor:grab;touch-action:pan-y}
 .vlak.tah.drzi{cursor:grabbing}
 .vlak-exp{margin-top:14px}
+/* mapa letů u expedice: půllitr letí po trase */
+.lm{margin:22px 0 26px}
+.lm .lm-hl{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
+.lm .lm-hl h3{margin:0;font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lm .lm-okno{position:relative;overflow:hidden;aspect-ratio:2.4/1;max-width:100%;background:color-mix(in srgb,var(--paper) 55%,var(--line));border:1px solid var(--line);border-radius:4px}
+@media (max-width:640px){.lm .lm-okno{aspect-ratio:1.45/1}}
+.lm .lm-svet{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.lm .lm-svet svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+.lm .lm-trasa{will-change:transform}
+.lm .zem path{fill:var(--land);stroke:color-mix(in srgb,var(--paper) 70%,transparent);stroke-width:.6;vector-effect:non-scaling-stroke}
+.lm .zem path.v{fill:color-mix(in srgb,var(--accent) 30%,var(--land))}
+.lm .zem circle.v{fill:var(--accent)}
+.lm .oblouk{fill:none;stroke:var(--accent);stroke-linecap:round;opacity:.9}
+.lm .ap circle{fill:var(--ink);stroke:var(--card);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.lm .ap text{fill:var(--ink);font-family:var(--mono);font-weight:600;paint-order:stroke;stroke:color-mix(in srgb,var(--paper) 85%,transparent);stroke-linejoin:round}
+.lm .pivo{position:absolute;left:0;top:0;width:26px;height:34px;margin:-17px 0 0 -13px;will-change:transform;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.lm .pivo svg{display:block;width:100%;height:100%}
+.lm .lm-pod{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px;min-height:2em}
+.lm .lm-pod span{font-family:var(--mono);font-size:.82rem;color:var(--muted);min-width:0}
+.lm .lm-pod button{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 11px;border-radius:3px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;flex:none}
+.lm .lm-pod button[hidden]{display:none}
+
 .vlak-pod{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;min-height:1.4em}
 .vlak-pod .stat{color:var(--ink)}
 /* návěstidlo u vláčku v expedici */
@@ -576,6 +598,7 @@ function detail(id){
     <div class="dmeta"><strong>${esc(e.countries)}</strong>${e.text?`<p>${esc(e.text)}</p>`:''}</div>
   </div></section>
   <div class="wrap">
+    ${LETY_EXP[e.id] ? lmHtml(e) : ''}
     ${e.photos.length ? '' : '<p class="label" style="padding-block:24px">Fotky z této cesty brzy doplním.</p>'}
     <div class="gallery">${(() => { let k = 0; return e.photos.map(p => p.v
       ? `<figure><video src="${p.v}" poster="${p.poster}" width="${p.w}" height="${p.h}" playsinline ${p.loop ? 'autoplay muted loop' : 'controls preload="none"'} aria-label="${esc(p.cap)}"></video><figcaption>${esc(p.cap)}</figcaption></figure>`
@@ -797,6 +820,128 @@ function vlakExpedice(e){
   tm.push(setTimeout(() => { s.classList.remove('jede'); if (stat) stat.textContent = ''; }, T + STOJI + 800 + odjezd + 300));
   // při odchodu ze stránky časovače zrušit
   const zrus = () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); if (zrusPrejezd) zrusPrejezd(); window.removeEventListener('hashchange', zrus); };
+  window.addEventListener('hashchange', zrus);
+}
+/* mapa letů u expedice: místo letadla letí půllitr v opilé spirále.
+   kamera: 1 = mapa jede za půllitrem (dlouhé trasy), jinak pevný výřez. Úsek s ~ = po zemi (tečkovaně). */
+const LETY_EXP = {
+  'jizni-amerika': { kamera: 1, trasa: ['PRAHA', 'PARIS', 'SANTIAGO CH', 'BUENOS AIRES', 'IGUAZU', 'RIO DEJANEIRO', 'PARIS', 'PRAHA'] },
+  'malteca':       { trasa: ['PRAHA', 'LA VALETTA', 'PRAHA'] },
+};
+const PROJ = (lat, lon) => { const R = Math.PI / 180, l = lon * R, p = lat * R, p2 = p * p, p4 = p2 * p2;
+  return [500 + 185.01300522314244 * l * (0.8707 - 0.131979 * p2 + p4 * (-0.013791 + p4 * (0.003971 * p2 - 0.001529 * p4))),
+          255.08452233618345 - 185.01300522314244 * p * (1.007226 + p2 * (0.015085 + p4 * (-0.044475 + 0.028874 * p2 - 0.005916 * p4)))]; };
+const kmMezi = (a, b) => { const R = Math.PI / 180, h = Math.sin((b[0] - a[0]) * R / 2) ** 2 + Math.cos(a[0] * R) * Math.cos(b[0] * R) * Math.sin((b[1] - a[1]) * R / 2) ** 2; return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(h))); };
+const pivoSvg = prazdny => `<svg viewBox="0 0 26 34" aria-hidden="true">
+  <path d="M18 10h3.2a3 3 0 0 1 3 3v8.5a3 3 0 0 1-3 3H18" fill="none" stroke="#b9c9cc" stroke-width="2.6"/>
+  <path d="M2.5 7.5h16.5l-1.3 23.6a2 2 0 0 1-2 1.9H5.8a2 2 0 0 1-2-1.9z" fill="rgba(235,245,247,.55)" stroke="#a9bcc0" stroke-width="1.2"/>
+  ${prazdny ? '<path d="M5.4 29.6h10.8" stroke="#e8b54a" stroke-width="1.4" stroke-linecap="round" opacity=".7"/>' : `
+  <path d="M3.6 11.5h14.3l-1.1 19.4a1.4 1.4 0 0 1-1.4 1.3H6.1a1.4 1.4 0 0 1-1.4-1.3z" fill="#f0a21a"/>
+  <path d="M6.2 13h2.2l-.4 17.4H6.9z" fill="#ffd36b" opacity=".55"/>
+  <circle cx="12" cy="24" r=".9" fill="#ffe6a3"/><circle cx="14.2" cy="18" r=".7" fill="#ffe6a3"/><circle cx="10.5" cy="28.5" r=".6" fill="#ffe6a3"/>
+  <path d="M2.2 10.6c-1.6-3 1.2-5.6 3.6-4.4C6.4 3 10.6 2.4 12 4.9c1.9-2.2 5.6-1 5.5 2 2.5.1 3.3 3.3 1.3 4.6-.4 1.1-1.6 1.4-2.6.9-.9 1-2.4 1-3.2.2-1 .9-2.8.9-3.7-.1-1 .8-2.6.6-3.2-.4-1.2.6-3.1.2-3.9-1.5z" fill="#fffaf0" stroke="#efe3c8" stroke-width=".6"/>`}
+</svg>`;
+function lmHtml(e){
+  return `<section class="lm" id="lm" aria-label="Trasa letů">
+    <div class="lm-hl"><h3>Trasa letů</h3></div>
+    <div class="lm-okno"><div class="lm-svet"></div><div class="pivo" hidden></div></div>
+    <div class="lm-pod"><span id="lmTxt" aria-hidden="true"></span><button type="button" id="lmZnovu" hidden>↻ Znovu</button></div>
+  </section>`;
+}
+function letMapa(e){
+  const cfg = LETY_EXP[e.id], box = document.getElementById('lm'); if (!cfg || !box) return;
+  const okno = box.querySelector('.lm-okno'), svet = box.querySelector('.lm-svet'), pivo = box.querySelector('.pivo'), txt = box.querySelector('#lmTxt'), znovu = box.querySelector('#lmZnovu');
+  const AP = D.lety.ap, klid = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const body = cfg.trasa.map(k => { const z = k[0] === '~', id = z ? k.slice(1) : k, a = AP[id]; return { id, zem: z, nazev: a[0], ll: [a[1], a[2]], p: PROJ(a[1], a[2]) }; });
+  pivo.innerHTML = pivoSvg(cfg.prazdny);
+  // úseky: kvadratický oblouk vybočený doleva od směru letu (cesta zpět tak vede jinudy)
+  const useky = body.slice(1).map((b, i) => { const a = body[i], dx = b.p[0] - a.p[0], dy = b.p[1] - a.p[1], L = Math.hypot(dx, dy) || 1;
+    const k = b.zem ? .06 : .2, c = [(a.p[0] + b.p[0]) / 2 + dy / L * L * k, (a.p[1] + b.p[1]) / 2 - dx / L * L * k];
+    return { a, b, c, L, zem: b.zem, km: Math.round(kmMezi(a.ll, b.ll)) }; });
+  const bod = (u, t) => { const s = 1 - t; return [s * s * u.a.p[0] + 2 * s * t * u.c[0] + t * t * u.b.p[0], s * s * u.a.p[1] + 2 * s * t * u.c[1] + t * t * u.b.p[1]]; };
+  // oblast mapy
+  const xs = [], ys = []; useky.forEach(u => [u.a.p, u.b.p, bod(u, .5)].forEach(q => { xs.push(q[0]); ys.push(q[1]); }));
+  const W = okno.clientWidth, H = okno.clientHeight, asp = W / H;
+  let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const okraj = Math.max(14, (x1 - x0) * .12, (y1 - y0) * .12); x0 -= okraj; x1 += okraj; y0 -= okraj; y1 += okraj;
+  const doAsp = (w, h, cx, cy) => { if (w / h < asp) w = h * asp; else h = w / asp; return [cx - w / 2, cy - h / 2, w, h]; };
+  const celek = doAsp(Math.max(x1 - x0, 60), Math.max(y1 - y0, 60 / asp), (x0 + x1) / 2, (y0 + y1) / 2);   // celá trasa v okně
+  let reg, s, RW, RH, obl = [];                                                                             // reg = co se vykreslí, s = px na jednotku mapy
+  const navst = new Set(short(e.countries));
+  const unik = [...new Map(body.map(b => [b.id, b])).values()];
+  function kresli(r_, s_, vse){
+    reg = r_; s = s_; RW = reg[2] * s; RH = reg[3] * s;
+    svet.style.width = RW + 'px'; svet.style.height = RH + 'px';
+    const vb = reg.map(n => n.toFixed(2)).join(' ');
+    const zem = D.map.p.map(p => p.d ? `<path d="${p.d}"${navst.has(p.cz) ? ' class="v"' : ''}></path>` : '').join('')
+      + D.map.p.filter(p => p.s && navst.has(p.cz)).map(p => `<circle class="v" cx="${p.c[0]}" cy="${p.c[1]}" r="${(3.5 / s).toFixed(2)}"></circle>`).join('');
+    const fs = 11 / s, r = 3.4 / s, sw = 2 / s;
+    // popisky: když by se překrývaly, přednost má Praha a cíle cesty, přestupy se nepopíšou
+    const poradi = unik.slice().sort((a, b) => (a.id === 'PRAHA' ? -1 : 0) - (b.id === 'PRAHA' ? -1 : 0)), boxy = [];
+    const ap = poradi.map(b => { const vlevo = b.p[0] > (reg[0] + reg[2] / 2) + reg[2] * .3;
+      const px = (b.p[0] - reg[0]) * s, py = (b.p[1] - reg[1]) * s, w = b.nazev.length * 7.2 + 4, x0 = vlevo ? px - 6 - w : px + 6, bx = [x0 - 3, py - 17, x0 + w + 3, py + 2];
+      const koliz = boxy.some(q => bx[0] < q[2] && bx[2] > q[0] && bx[1] < q[3] && bx[3] > q[1]) || unik.some(o => o !== b && Math.abs((o.p[0] - reg[0]) * s - (bx[0] + bx[2]) / 2) < (bx[2] - bx[0]) / 2 && Math.abs((o.p[1] - reg[1]) * s - (bx[1] + bx[3]) / 2) < 10);
+      if (!koliz) boxy.push(bx);
+      return `<g class="ap"><circle cx="${b.p[0]}" cy="${b.p[1]}" r="${r}"></circle>${koliz ? '' : `<text x="${b.p[0] + (vlevo ? -1 : 1) * 6 / s}" y="${b.p[1] - 5 / s}" font-size="${fs}" stroke-width="${3 / s}" text-anchor="${vlevo ? 'end' : 'start'}">${esc(b.nazev)}</text>`}</g>`; }).join('');
+    // let = plná čára odkrývaná přes pathLength; po zemi = tečky (odkrývají se maskou délky)
+    const oblouky = useky.map((u, i) => `<path class="oblouk" d="M${u.a.p[0]},${u.a.p[1]}Q${u.c[0]},${u.c[1]} ${u.b.p[0]},${u.b.p[1]}" pathLength="1" stroke-width="${sw}" stroke-dasharray="${u.zem ? `0.0001 ${(6 / s / u.L).toFixed(4)}` : '1 1'}" ${u.zem ? `opacity="${vse ? .9 : 0}"` : `stroke-dashoffset="${vse ? 0 : 1}"`}></path>`).join('');
+    svet.innerHTML = `<svg class="zem" viewBox="${vb}" preserveAspectRatio="none" aria-hidden="true">${zem}</svg><svg class="lm-trasa" viewBox="${vb}" preserveAspectRatio="none" aria-hidden="true">${oblouky}${ap}</svg>`;
+    obl = [...svet.querySelectorAll('.oblouk')];
+  }
+  if (cfg.kamera) { const camW = Math.min(260, W * .45); kresli([celek[0] - camW / 2, celek[1] - camW / asp / 2, celek[2] + camW, celek[3] + camW / asp], W / camW); }
+  else kresli(celek, W / celek[2]);
+  const naPx = q => [(q[0] - reg[0]) * s, (q[1] - reg[1]) * s];
+  const celkemKm = useky.reduce((a, u) => a + u.km, 0), letu = useky.filter(u => !u.zem).length;
+  const souhrn = `${letu} ${letu === 1 ? 'let' : letu < 5 ? 'lety' : 'letů'} · přibližně ${kmFmt(Math.round(celkemKm / 100) * 100)} km`;
+  // kamera: posun (a na konci oddálení) celé vrstvy mapy
+  const zobrazCelek = () => { const z = W / (celek[2] * s); return { z, tx: -(celek[0] - reg[0]) * s * z, ty: -(celek[1] - reg[1]) * s * z }; };
+  let cam = { z: 1, tx: 0, ty: 0 };
+  const nastavCam = c => { cam = c; svet.style.transform = `translate3d(${c.tx}px,${c.ty}px,0) scale(${c.z})`; };
+  const sledovat = q => { const p = naPx(q); nastavCam({ z: 1, tx: Math.min(0, Math.max(W - RW, W / 2 - p[0])), ty: Math.min(0, Math.max(H - RH, H / 2 - p[1])) }); };
+  const pivoNa = (q, rot) => { const p = naPx(q); pivo.style.transform = `translate3d(${p[0] * cam.z + cam.tx}px,${p[1] * cam.z + cam.ty}px,0) rotate(${rot}deg)`; };
+  const ostre = () => { if (cfg.kamera && reg !== celek) { kresli(celek, W / celek[2], true); nastavCam({ z: 1, tx: 0, ty: 0 }); } };
+  const hotovo = () => { obl.forEach((o, i) => o.setAttribute(useky[i].zem ? 'opacity' : 'stroke-dashoffset', useky[i].zem ? '.9' : '0')); if (cfg.kamera) nastavCam(zobrazCelek()); else nastavCam({ z: 1, tx: 0, ty: 0 }); txt.textContent = souhrn; };
+  if (klid) { hotovo(); ostre(); return; }
+  // pohyb: základní oblouk + nepravidelné smyčky, které se na koncích stáhnou do letiště
+  let raf = 0, tm = 0, gen = 0;
+  const easy = t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+  function let1(i, g){
+    if (g !== gen) return;
+    if (i >= useky.length) { pivo.style.transition = cfg.kamera ? 'transform 1.4s cubic-bezier(.4,0,.2,1)' : '';
+      svet.style.transition = cfg.kamera ? 'transform 1.4s cubic-bezier(.4,0,.2,1)' : ''; hotovo(); pivoNa(body[body.length - 1].p, 0);
+      tm = setTimeout(() => { svet.style.transition = pivo.style.transition = ''; pivo.hidden = true; znovu.hidden = false; ostre(); }, 1600); return; }
+    const u = useky[i], Lpx = u.L * s, T = 1100 + Math.sqrt(Lpx) * 95 * (u.zem ? 1.2 : 1);
+    const smycek = Math.max(2, Math.round(T / 1000 * 2.2)), Rpx = u.zem ? 5 : 12, f1 = Math.random() * 6.3, f2 = Math.random() * 6.3, f3 = Math.random() * 6.3;
+    txt.textContent = `${u.zem ? 'Po zemi' : 'Let ' + (useky.slice(0, i + 1).filter(x => !x.zem).length) + '/' + letu} · ${u.a.nazev} → ${u.b.nazev} · ${kmFmt(u.km)} km`;
+    const t0 = performance.now();
+    const krok = now => { if (g !== gen) return;
+      const k = Math.min(1, (now - t0) / T), t = easy(k), zaklad = bod(u, t);
+      const fi = 2 * Math.PI * smycek * (k + .035 * Math.sin(2 * Math.PI * k * 3 + f1)) + f2;
+      const obal = Math.sin(Math.PI * k) ** .7, rr = Rpx / s * obal * (1 + .35 * Math.sin(k * 9.1 + f3));
+      const q = [zaklad[0] + Math.cos(fi) * rr, zaklad[1] + Math.sin(fi) * rr];
+      if (cfg.kamera) sledovat(zaklad);
+      if (u.zem) obl[i].setAttribute('opacity', (.9 * t).toFixed(3)); else obl[i].setAttribute('stroke-dashoffset', (1 - t).toFixed(4));
+      pivoNa(q, Math.sin(fi) * 28 * obal);
+      if (k < 1) raf = requestAnimationFrame(krok); else tm = setTimeout(() => let1(i + 1, g), 450);
+    };
+    raf = requestAnimationFrame(krok);
+  }
+  const velke = cfg.kamera ? [reg, s] : null;
+  function spust(){ gen++; cancelAnimationFrame(raf); clearTimeout(tm); znovu.hidden = true; pivo.hidden = false;
+    if (velke && reg !== velke[0]) kresli(velke[0], velke[1]);
+    svet.style.transition = pivo.style.transition = '';
+    obl.forEach((o, i) => o.setAttribute(useky[i].zem ? 'opacity' : 'stroke-dashoffset', useky[i].zem ? '0' : '1'));
+    if (cfg.kamera) sledovat(body[0].p); else nastavCam({ z: 1, tx: 0, ty: 0 });
+    pivoNa(body[0].p, 0); txt.textContent = '';
+    const g = gen; tm = setTimeout(() => let1(0, g), 500); }
+  // výchozí stav, než se dojede: celá mapa bez trasy
+  if (cfg.kamera) sledovat(body[0].p); else nastavCam({ z: 1, tx: 0, ty: 0 });
+  pivoNa(body[0].p, 0); pivo.hidden = false;
+  znovu.onclick = spust;
+  let io = null;
+  if ('IntersectionObserver' in window) { io = new IntersectionObserver(en => { if (en[0].isIntersecting) { io.disconnect(); spust(); } }, { threshold: .55 }); io.observe(okno); }
+  else hotovo();
+  const zrus = () => { gen++; cancelAnimationFrame(raf); clearTimeout(tm); if (io) io.disconnect(); window.removeEventListener('hashchange', zrus); };
   window.addEventListener('hashchange', zrus);
 }
 /* posouvání vláčku myší nebo prstem; klepnutí na vagon ukáže název státu */
@@ -1270,7 +1415,7 @@ let current = [];
 function render(){
   const h = location.hash.slice(1);
   const e = D.exp.find(x=>x.id===h);
-  if(e){ app.innerHTML = detail(h); current = pics(e); window.scrollTo(0,0); vlakExpedice(e); }
+  if(e){ app.innerHTML = detail(h); current = pics(e); window.scrollTo(0,0); vlakExpedice(e); letMapa(e); }
   else if(h === 'pexeso'){ app.innerHTML = pexesoPage(); current = []; PX(); window.scrollTo(0,0); }
   else if(h === 'partneri'){ app.innerHTML = partneriPage(); current = []; window.scrollTo(0,0); }
   else if(h === 'lukostrelba'){ app.innerHTML = lukPage(); current = []; LK(); window.scrollTo(0,0); }
