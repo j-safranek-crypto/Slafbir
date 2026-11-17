@@ -162,6 +162,17 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .partner p{margin:8px 0 12px;max-width:62ch}
 .partner .odkaz{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--accent)}
 @media (max-width:560px){.partner{grid-template-columns:1fr}.partner .logo{max-width:160px;aspect-ratio:auto}}
+/* rozcestník na úvodní stránce */
+.kamdal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.kamdal a{position:relative;display:block;min-height:190px;border-radius:4px;overflow:hidden;text-decoration:none;color:#fff;background:var(--ink)}
+.kamdal img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.75;transition:transform .4s ease}
+.kamdal a:hover img{transform:scale(1.04)}
+.kamdal span{position:absolute;inset:auto 0 0 0;padding:14px 16px;background:linear-gradient(transparent,rgba(0,0,0,.7));font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;line-height:1.4}
+.kamdal b{display:block;font-family:var(--display);font-size:2rem;font-weight:800;text-transform:uppercase;letter-spacing:.01em;line-height:1}
+.kamdal .kmap{background:var(--stamp-a)}
+.kamdal .kmap span{background:none}
+@media (max-width:760px){.kamdal{grid-template-columns:1fr}.kamdal a{min-height:150px}}
+.nav a[aria-current="page"]{background:var(--ink);color:var(--paper)}
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
@@ -373,12 +384,17 @@ const pics = e => e.photos.filter(p=>!p.v && !zamceno(p));
 const count = e => { if(!e.photos.length) return 'Fotky brzy doplním'; const f = pics(e).length, v = e.photos.length - f; const fw = f===1?'fotografie':(f<5?'fotografie':'fotografií'); return `${f} ${fw}` + (v ? ` · ${v} ${v===1?'video':(v<5?'videa':'videí')}` : ''); };
 const stripCountry = c => c.includes(':') ? c.split(':').slice(1).join(':').trim() : c;
 
-function home(){
+const homeVars = () => {
   const byYear = {};
   D.exp.forEach(e => (byYear[e.year] = byYear[e.year] || []).push(e));
   const years = Object.keys(byYear).sort((a,b)=>b-a);
   const nStates = D.continents.reduce((a,c)=>a+c[1].length,0);
   const first = Math.min(...D.exp.map(e=>e.year)), last = Math.max(...D.exp.map(e=>e.year));
+    return {byYear, years, nStates, first, last};
+};
+function home(){
+  const {byYear, years, nStates, first, last} = homeVars();
+  const cover = (D.exp.find(e => e.id === 'mezopotamie' && e.cover) || D.exp.find(e => e.cover)).cover, alb = D.album[0];
   return `
   <section class="hero">
     <img src="${D.hero.f}" alt="${esc(D.hero.cap)}">
@@ -400,7 +416,18 @@ function home(){
     <div><h3>Soutěž ke spuštění webu</h3><p>Od 1. do 31. prosince 2026 tu poběží soutěž s otázkami o mých cestách a možná i o kočkách. Většinu odpovědí najdete na tomhle webu, nejlepší desítka se objeví v žebříčku. Hraje se pro zábavu, ne o ceny. Podrobnosti už brzy.</p></div>
   </aside></div>
 
-  <section class="block" id="expedice"><div class="wrap">
+
+  <section class="block kam"><div class="wrap">
+    <div class="head"><h2>Kam dál</h2></div>
+    <div class="kamdal">
+      <a href="#expedice"><img src="${cover}" alt="" loading="lazy"><span><b>Expedice</b>${D.exp.length} výprav od nejnovější →</span></a>
+      <a href="#staty" class="kmap"><span><b>Státy a lety</b>${nStates} států na mapě, ${D.lety.legs.length} letů na odletové tabuli →</span></a>
+      <a href="#album"><img src="${alb.f}" alt="" loading="lazy"><span><b>Fotoalbum</b>Výběr nejhezčích fotek z cest →</span></a>
+    </div>
+  </div></section>`;
+}
+function expedicePage(){
+  return `  <section class="block" id="expedice"><div class="wrap">
     <div class="head"><h2>Expedice</h2><span class="label">Od nejnovější</span></div>
     <div class="cards all">
       ${D.exp.map(e => `
@@ -412,7 +439,11 @@ function home(){
     </div>
   </div></section>
 
-  <section class="block" id="staty"><div class="wrap">
+`;
+}
+function statyPage(){
+  const {nStates} = homeVars();
+  return `  <section class="block" id="staty"><div class="wrap">
     <div class="head"><h2>Navštívené státy</h2><span class="label">${nStates} států z cest</span></div>
     <div class="map">
       <div class="maptools" role="group" aria-label="Výřez mapy">
@@ -428,12 +459,14 @@ function home(){
     ${flightsHtml()}
   </div></section>
 
-  <section class="block" id="album"><div class="wrap">
+`;
+}
+function albumPage(){
+  return `  <section class="block" id="album"><div class="wrap">
     <div class="head"><h2>Fotoalbum</h2><span class="label">Výběr z cest</span></div>
     <div class="album">${D.album.map((p,i)=>`<figure><button data-set="album" data-i="${i}"><img src="${p.f}" alt="${esc(p.cap)}" loading="lazy" width="${p.w}" height="${p.h}"></button><figcaption>${esc(p.cap)}</figcaption></figure>`).join('')}</div>
   </div></section>`;
 }
-
 function detail(id){
   const i = D.exp.findIndex(e=>e.id===id);
   const e = D.exp[i];
@@ -914,10 +947,13 @@ function render(){
   else if(h === 'pexeso'){ app.innerHTML = pexesoPage(); current = []; PX(); window.scrollTo(0,0); }
   else if(h === 'partneri'){ app.innerHTML = partneriPage(); current = []; window.scrollTo(0,0); }
   else if(h === 'lukostrelba'){ app.innerHTML = lukPage(); current = []; LK(); window.scrollTo(0,0); }
-  else {
-    app.innerHTML = home(); current = D.album; TB();
-    if(h){ const t = document.getElementById(h); if(t) t.scrollIntoView(); } else window.scrollTo(0,0);
-  }
+  else if(h === 'expedice'){ app.innerHTML = expedicePage(); current = []; window.scrollTo(0,0); }
+  else if(h === 'staty' || h === 'lety'){ app.innerHTML = statyPage(); current = []; TB();
+    if(h === 'lety'){ const t = document.getElementById('lety'); if(t) t.scrollIntoView(); } else window.scrollTo(0,0); }
+  else if(h === 'album'){ app.innerHTML = albumPage(); current = D.album; window.scrollTo(0,0); }
+  else { app.innerHTML = home(); current = []; window.scrollTo(0,0); }
+  const sekce = e ? 'expedice' : h === 'lety' ? 'staty' : h;
+  document.querySelectorAll('.nav a').forEach(a => { if (a.getAttribute('href') === '#' + sekce) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
 }
 window.addEventListener('hashchange', render);
 render();
