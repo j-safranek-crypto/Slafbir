@@ -8,6 +8,9 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://slafbir.cz/">
 <meta property="og:image" content="https://slafbir.cz/img/fil-07.jpg">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Šláfbír</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -149,7 +152,7 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .lk .pin{fill:var(--accent);stroke:var(--card);vector-effect:non-scaling-stroke;stroke-width:2}
 .lk .shot line{stroke:var(--ink);stroke-width:2;stroke-dasharray:5 4;vector-effect:non-scaling-stroke}
 .lk .akce{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
-.lk .btn{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;padding:11px 14px;border-radius:3px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.lk .btn{display:inline-block;text-decoration:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;padding:11px 14px;border-radius:3px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 .lk .btn.main{border-color:var(--ink);background:var(--ink);color:var(--paper);padding:12px 20px}
 .lk .btn:disabled{opacity:.4;cursor:default}
 
@@ -1255,7 +1258,7 @@ function lukPage(){
   <div class="konec" id="lkKonec" hidden>
     <div class="st"><div><span>Terč</span><b id="kB">0</b><span>ze 100</span></div></div>
     <div><h2 id="kH"></h2><p id="kP"></p><p class="z7" id="kZ"></p><p class="odem" id="kO" hidden></p><ol id="kL"></ol><p class="rek" id="kR"></p>
-      <button type="button" class="btn main" id="znovu">Hrát znovu</button></div>
+      <a class="btn main" id="znovu" href="#">Zpět na hlavní stránku</a></div>
   </div>
   <p class="pozn">Body podle vzdálenosti: do 50 km 10, do 150 km 9, do 300 km 8, do 500 km 7, do 750 km 6, do 1 000 km 5, do 1 500 km 4, do 2 000 km 3, do 3 000 km 2, do 5 000 km 1. Nápověda ubere 2 body. Kdo nastřílí aspoň 30 bodů, hraje bonus na zelenou: za každý správně přiřazený pár fotky a místa 10 bodů, dohromady tedy až 100 bodů. Odemčení platí do neděle a pamatuje si ho jen tvůj prohlížeč, stejně jako rekord.</p>
   </div></section>`;
@@ -1360,7 +1363,7 @@ const LK = (() => {
     if (s >= 88) return ['Robin Hood', 'Trefuješ se i se zavřenýma očima.'];
     if (s >= 70) return ['Ostrostřelec', 'Na mapě se vyznáš líp než leckterý průvodce.'];
     if (s >= 50) return ['Dobrá muška', 'Občas to uletělo, ale směr držíš.'];
-    if (s >= 30) return ['Zatoulaný šíp', 'Svět je velký. Zkus to znovu.'];
+    if (s >= 30) return ['Zatoulaný šíp', 'Svět je velký. Zkus to jindy.'];
     return ['Šíp v toulci', 'Možná příště radši pexeso?'];
   }
   function naZelenou(){
@@ -1406,7 +1409,7 @@ const LK = (() => {
       o.innerHTML = `Gratuluju! Odemkl jsi ${SK.size} skrytých fotek. Najdeš je v albech jednotlivých <a href="#expedice">expedic</a>. Odemčené zůstanou do neděle, v pondělí se zase zamknou.`;
       $('lkCil').textContent = 'Skryté fotky v albech máš tento týden odemčené. V pondělí se zase zamknou. Hraj dál o rekord.'; }
     else if (uz) o.textContent = 'Skryté fotky už máš tento týden odemčené.';
-    else o.textContent = `Na odemčení skrytých fotek chybělo ${LIMIT - soucet} ${LIMIT - soucet === 1 ? 'bod' : LIMIT - soucet < 5 ? 'body' : 'bodů'}. Zkus to znovu.`;
+    else o.textContent = `Na odemčení skrytých fotek chybělo ${LIMIT - soucet} ${LIMIT - soucet === 1 ? 'bod' : LIMIT - soucet < 5 ? 'body' : 'bodů'}. Zkus to jindy.`;
     $('kL').innerHTML = vysledky.map(v => `<li>${esc(v.m[1])} · ${esc(v.m[2])}: <strong>${v.b}</strong> (${Math.round(v.d).toLocaleString('cs-CZ')} km${v.n ? ', s nápovědou' : ''})</li>`).join('') + (zelena != null ? `<li>Zelená: ${zelena} ze 3 párů: <strong>${zelena * 10}</strong></li>` : '');
     let rek = null; try { rek = JSON.parse(localStorage.getItem(REK)); } catch(e){}
     let t; if (rek == null || soucet > rek) { try { localStorage.setItem(REK, JSON.stringify(soucet)); } catch(e){} t = rek == null ? 'Tvůj první rekord.' : 'Nový rekord!'; } else t = `Tvůj rekord: ${rek} bodů`;
@@ -1421,7 +1424,6 @@ const LK = (() => {
     $('svet').addEventListener('click', () => { zoomTo(FULL.slice()); $('hint').textContent = 'Klepni do oblasti a přiblíží se'; });
     $('nap').addEventListener('click', () => { if (hotovo || napoveda) return; napoveda = true; $('napT').textContent = kolo[i][6]; $('napT').hidden = false; $('nap').disabled = true; });
     $('dal').addEventListener('click', () => { if (i < N - 1) { i++; sip(); window.scrollTo({top: $('sipy').getBoundingClientRect().top + scrollY - ((document.querySelector('.bar') || {}).offsetHeight || 0) - 16, behavior: reduce() ? 'auto' : 'smooth'}); } else if (soucet >= ZEL_OD) naZelenou(); else konec(); });
-    $('znovu').addEventListener('click', () => { nova(); window.scrollTo({top: 0, behavior: reduce() ? 'auto' : 'smooth'}); });
     nova();
   };
 })();
