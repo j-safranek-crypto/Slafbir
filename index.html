@@ -503,7 +503,9 @@ function pexesoPage(){
 }
 /* lukostřelba */
 const LK_KEY = 'slafbir-lukostrelba-odemceno';
-const odemceno = () => { try { return localStorage.getItem(LK_KEY) === '1'; } catch(e){ return false; } };
+// odemčení platí do konce týdne, v pondělí (místního času) se skryté fotky znovu zamknou
+const tyden = () => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); };
+const odemceno = () => { try { return localStorage.getItem(LK_KEY) === tyden(); } catch(e){ return false; } };
 function lukPage(){
   const odem = odemceno(), n = D.luk.skryte.length;
   return `<section class="lk"><div class="wrap">
@@ -511,7 +513,7 @@ function lukPage(){
     <div class="label">Minihra</div>
     <h1>Lukostřelba</h1>
     <p class="intro">Kde byla fotka pořízená? Klepni do mapy, ta se přiblíží. Pak zamiř přesně a vystřel. Čím blíž trefíš, tím víc bodů: střed terče je za 10.</p>
-    <p class="lkcil" id="lkCil">${odem ? `Skryté fotky v albech máš odemčené. Hraj dál o rekord.` : `V albech expedic je ${n} skrytých fotek. Získej aspoň <b>30 z 60 bodů</b> a všechny se ti odkryjí. Polovinu terčů tvoří právě ony.`}</p>
+    <p class="lkcil" id="lkCil">${odem ? `Skryté fotky v albech máš tento týden odemčené. V pondělí se zase zamknou. Hraj dál o rekord.` : `V albech expedic je ${n} skrytých fotek. Získej aspoň <b>30 z 60 bodů</b> a všechny se ti do konce týdne odkryjí. Každé pondělí se zase zamknou. Polovinu terčů tvoří právě ony.`}</p>
   </header>
   <div class="stat" aria-live="polite">
     <span class="sipy" id="sipy" aria-hidden="true"></span>
@@ -544,7 +546,7 @@ function lukPage(){
     <div><h2 id="kH"></h2><p id="kP"></p><p class="odem" id="kO" hidden></p><ol id="kL"></ol><p class="rek" id="kR"></p>
       <button type="button" class="btn main" id="znovu">Hrát znovu</button></div>
   </div>
-  <p class="pozn">Body podle vzdálenosti: do 50 km 10, do 150 km 9, do 300 km 8, do 500 km 7, do 750 km 6, do 1 000 km 5, do 1 500 km 4, do 2 000 km 3, do 3 000 km 2, do 5 000 km 1. Nápověda ubere 2 body. Odemčení a rekord si pamatuje jen tvůj prohlížeč.</p>
+  <p class="pozn">Body podle vzdálenosti: do 50 km 10, do 150 km 9, do 300 km 8, do 500 km 7, do 750 km 6, do 1 000 km 5, do 1 500 km 4, do 2 000 km 3, do 3 000 km 2, do 5 000 km 1. Nápověda ubere 2 body. Odemčení platí do neděle a pamatuje si ho jen tvůj prohlížeč, stejně jako rekord.</p>
   </div></section>`;
 }
 const LK = (() => {
@@ -634,10 +636,10 @@ const LK = (() => {
     const [h, p] = hlaska(soucet), uz = odemceno();
     $('kB').textContent = soucet; $('kH').textContent = h; $('kP').textContent = p;
     const o = $('kO'); o.hidden = false;
-    if (soucet >= LIMIT && !uz) { try { localStorage.setItem(LK_KEY, '1'); } catch(e){}
-      o.innerHTML = `Gratuluju! Odemkl jsi ${SK.size} skrytých fotek. Najdeš je v albech jednotlivých <a href="#expedice">expedic</a>.`;
-      $('lkCil').textContent = 'Skryté fotky v albech máš odemčené. Hraj dál o rekord.'; }
-    else if (uz) o.textContent = 'Skryté fotky už máš odemčené.';
+    if (soucet >= LIMIT && !uz) { try { localStorage.setItem(LK_KEY, tyden()); } catch(e){}
+      o.innerHTML = `Gratuluju! Odemkl jsi ${SK.size} skrytých fotek. Najdeš je v albech jednotlivých <a href="#expedice">expedic</a>. Odemčené zůstanou do neděle, v pondělí se zase zamknou.`;
+      $('lkCil').textContent = 'Skryté fotky v albech máš tento týden odemčené. V pondělí se zase zamknou. Hraj dál o rekord.'; }
+    else if (uz) o.textContent = 'Skryté fotky už máš tento týden odemčené.';
     else o.textContent = `Na odemčení skrytých fotek chybělo ${LIMIT - soucet} ${LIMIT - soucet === 1 ? 'bod' : LIMIT - soucet < 5 ? 'body' : 'bodů'}. Zkus to znovu.`;
     $('kL').innerHTML = vysledky.map(v => `<li>${esc(v.m[1])} · ${esc(v.m[2])}: <strong>${v.b}</strong> (${Math.round(v.d).toLocaleString('cs-CZ')} km${v.n ? ', s nápovědou' : ''})</li>`).join('');
     let rek = null; try { rek = JSON.parse(localStorage.getItem('slafbir-lukostrelba-rekord')); } catch(e){}
