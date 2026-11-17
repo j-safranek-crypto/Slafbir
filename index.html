@@ -291,6 +291,8 @@ fl-c.fl{animation:flipch .1s linear}
 .lm .lm-pod span{font-family:var(--mono);font-size:.82rem;color:var(--muted);min-width:0}
 .lm .lm-pod button{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;padding:7px 11px;border-radius:3px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;flex:none}
 .lm .lm-pod button[hidden]{display:none}
+.lm .bublina{position:absolute;left:0;top:0;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff 0 25%,rgba(255,250,235,.75) 45%,rgba(240,162,26,.35) 100%);border:1.5px solid rgba(214,150,30,.55);pointer-events:none;will-change:transform,opacity}
+.lm .hladina{position:absolute;inset:0;background:linear-gradient(to top,#f0a21a 0%,#f6be4f 70%,#fff6dc 100%);pointer-events:none;will-change:transform,opacity}
 
 .vlak-pod{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;min-height:1.4em}
 .vlak-pod .stat{color:var(--ink)}
@@ -905,7 +907,7 @@ function lmHtml(e){
   return `<section class="lm" id="lm" aria-label="Trasa letů">
     <div class="lm-hl"><h3>Trasa letů</h3></div>
     <div class="lm-okno"><div class="lm-svet"></div><div class="pivo" hidden></div></div>
-    <div class="lm-pod"><span id="lmTxt" aria-hidden="true"></span><button type="button" id="lmZnovu" hidden>↻ Znovu</button></div>
+    <div class="lm-pod"><span id="lmTxt" aria-hidden="true"></span><button type="button" id="lmZnovu" hidden></button></div>
   </section>`;
 }
 function letMapa(e){
@@ -1064,7 +1066,7 @@ function letMapa(e){
     if (g !== gen) return;
     if (i >= useky.length) { pivo.style.transition = cfg.kamera ? 'transform 1.4s cubic-bezier(.4,0,.2,1)' : '';
       svet.style.transition = cfg.kamera ? 'transform 1.4s cubic-bezier(.4,0,.2,1)' : ''; hotovo(); pivoNa(body[body.length - 1].p, 0);
-      tm = setTimeout(() => { svet.style.transition = pivo.style.transition = ''; pivo.hidden = true; znovu.hidden = false; ostre(); }, 1600); return; }
+      tm = setTimeout(() => { svet.style.transition = pivo.style.transition = ''; pivo.hidden = true; ostre(); tm = setTimeout(() => rozpust(g), 3000); }, 1600); return; }
     const u = useky[i], chci = cfg.zemW && u.zem ? 'zem' : 'let';
     if (chci !== scena) { prejdi(chci, u.a.p, () => let1(i, g), g, i); return; }
     const Lpx = u.L * s, T = cfg.zemW && u.zem ? 700 + Math.sqrt(Lpx) * 70 : 1100 + Math.sqrt(Lpx) * 95 * (u.zem ? 1.2 : 1);
@@ -1087,6 +1089,25 @@ function letMapa(e){
       else tm = setTimeout(() => let1(i + 1, g), u.zem && useky[i + 1] && useky[i + 1].zem ? 250 : 450);
     };
     raf = requestAnimationFrame(krok);
+  }
+  // po dohrání: mapa se rozpije v bublinkách a zmizí, fotky se posunou nahoru (znovu až při dalším otevření expedice)
+  function rozpust(g){
+    if (g !== gen) return;
+    const BUB = 64;
+    for (let n = 0; n < BUB; n++) { const b = document.createElement('span'), v = 4 + Math.random() * 12, x = Math.random() * W, T = 1300 + Math.random() * 1300, d = Math.random() * 1600;
+      b.className = 'bublina'; b.style.width = b.style.height = v + 'px'; okno.appendChild(b);
+      b.animate([{ transform: `translate3d(${x}px,${H + 12}px,0)`, opacity: 0 }, { opacity: .95, offset: .15 },
+                 { transform: `translate3d(${x + (Math.random() - .5) * 40}px,${H * (.05 + Math.random() * .4)}px,0) scale(${1 + Math.random() * .5})`, opacity: 0 }],
+                { duration: T, delay: d, easing: 'cubic-bezier(.3,.1,.5,1)', fill: 'both' }); }
+    const pivko = document.createElement('div'); pivko.className = 'hladina'; okno.appendChild(pivko);
+    pivko.animate([{ transform: 'translateY(100%)', opacity: .0 }, { transform: 'translateY(35%)', opacity: .55, offset: .5 }, { transform: 'translateY(0)', opacity: 0 }], { duration: 2600, delay: 300, easing: 'ease-in-out', fill: 'both' });
+    svet.animate([{ filter: 'blur(0)', opacity: 1, transform: svet.style.transform }, { filter: 'blur(7px)', opacity: 0, transform: svet.style.transform + ' scale(1.04)' }], { duration: 1900, delay: 900, easing: 'ease-in', fill: 'forwards' });
+    tm = setTimeout(() => { if (g !== gen) return;
+      const h = box.offsetHeight, cs = getComputedStyle(box);
+      box.style.overflow = 'hidden'; box.style.height = h + 'px';
+      box.animate([{ height: h + 'px', marginTop: cs.marginTop, marginBottom: cs.marginBottom, opacity: 1 }, { height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0 }], { duration: 750, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' })
+        .onfinish = () => box.remove();
+    }, 2900);
   }
   const velke = cfg.kamera ? [reg, s] : null;
   function spust(){ gen++; cancelAnimationFrame(raf); clearTimeout(tm); znovu.hidden = true; pivo.hidden = false;
