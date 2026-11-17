@@ -699,17 +699,22 @@ function vlakExpedice(e){
     if (el && stat) stat.textContent = el.classList.contains('loko') ? 'Česko – domov' : el.title; };
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { s.style.transform = `translateX(${x1}px)`; return; }
   const jed = (x, ms, kriv) => { s.style.transition = `transform ${ms}ms ${kriv}`; s.classList.add('jede'); s.style.transform = `translateX(${x}px)`; };
-  const T = 1600 + zeme.length * 120;
+  const T = 4200 + zeme.length * 250, STOJI = 3000;                                                   // pomalejší příjezd, stání 3 s
   s.style.transform = `translateX(${-W - 20}px)`; void s.offsetWidth;
-  requestAnimationFrame(() => jed(x1, T, 'cubic-bezier(.2,.6,.3,1)'));
-  const tm = [];
-  tm.push(setTimeout(() => s.classList.remove('jede'), T + 100));                                   // stojí
-  tm.push(setTimeout(() => { nav.classList.remove('stuj'); nav.classList.add('volno'); }, T + 5000)); // padne volno
+  requestAnimationFrame(() => jed(x1, T, 'cubic-bezier(.25,.55,.35,1)'));
+  const tm = []; let raf = 0;
+  tm.push(setTimeout(() => s.classList.remove('jede'), T + 100));                                     // stojí
+  tm.push(setTimeout(() => { nav.classList.remove('stuj'); nav.classList.add('volno'); }, T + STOJI)); // padne volno
   const odjezd = 2600 + zeme.length * 150;
-  tm.push(setTimeout(() => jed(sirka + 40, odjezd, 'cubic-bezier(.55,0,.85,.6)'), T + 5800));        // rozjede se a odjede
-  tm.push(setTimeout(() => { s.classList.remove('jede'); nav.classList.remove('volno'); nav.classList.add('stuj'); if (stat) stat.textContent = ''; }, T + 5800 + odjezd + 300));
+  tm.push(setTimeout(() => {
+    jed(sirka + 40, odjezd, 'cubic-bezier(.55,0,.85,.6)');                                            // rozjede se a odjede
+    const lok = s.querySelector('.loko');
+    const hlid = () => { if (lok.getBoundingClientRect().left > nav.getBoundingClientRect().right) { nav.classList.remove('volno'); nav.classList.add('stuj'); return; } raf = requestAnimationFrame(hlid); };
+    raf = requestAnimationFrame(hlid);                                                                // červená, jakmile lokomotiva projede
+  }, T + STOJI + 800));
+  tm.push(setTimeout(() => { s.classList.remove('jede'); if (stat) stat.textContent = ''; }, T + STOJI + 800 + odjezd + 300));
   // při odchodu ze stránky časovače zrušit
-  const zrus = () => { tm.forEach(clearTimeout); window.removeEventListener('hashchange', zrus); };
+  const zrus = () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); window.removeEventListener('hashchange', zrus); };
   window.addEventListener('hashchange', zrus);
 }
 /* posouvání vláčku myší nebo prstem; klepnutí na vagon ukáže název státu */
