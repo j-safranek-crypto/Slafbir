@@ -926,14 +926,15 @@ function prejezd(box, s, sirka){
 /* přivolaný vlak: přejezd se zase zavře a po průjezdu otevře, Malina už nepřijede (jede jen jednou) */
 function prejezdZnovu(box, s){
   const sx = +box.dataset.sx, vys = box.querySelector('.vystraznik'), zav = [...box.querySelectorAll('.zavora')];
-  zav.forEach(z => z.classList.remove('nahoru')); vys.classList.remove('otevreno'); vys.classList.add('zavreno');
+  vys.classList.remove('otevreno'); vys.classList.add('zavreno');                     // hned předzvánění (bliká červeně)
   let raf = 0, tm = 0;
+  const tz = setTimeout(() => zav.forEach(z => z.classList.remove('nahoru')), 3000);   // po 3 s spadnou závory
   const hlid = () => { const posl = s.querySelector('.souprava > :last-child'), b = box.getBoundingClientRect();
     if (s.dataset.odjizdi && posl.getBoundingClientRect().left - b.left > sx + 46) {
       tm = setTimeout(() => { zav.forEach(z => z.classList.add('nahoru')); vys.classList.remove('zavreno'); vys.classList.add('otevreno'); }, 900); return; }
     raf = requestAnimationFrame(hlid); };
   raf = requestAnimationFrame(hlid);
-  return () => { clearTimeout(tm); cancelAnimationFrame(raf); };
+  return () => { clearTimeout(tm); clearTimeout(tz); cancelAnimationFrame(raf); };
 }
 /* vláček v záhlaví expedice: přijede k návěstidlu „Stůj“, 5 s stojí, padne „Volno“ a odjede */
 function vlakExpedice(e, znovu){
@@ -952,11 +953,13 @@ function vlakExpedice(e, znovu){
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { s.style.transform = `translateX(${x1}px)`; return; }
   const jed = (x, ms, kriv) => { s.style.transition = `transform ${ms}ms ${kriv}`; s.classList.add('jede'); s.style.transform = `translateX(${x}px)`; };
   const T = 4200 + zeme.length * 250, STOJI = 3000;                                                   // pomalejší příjezd, stání 3 s
+  // přivolaný vlak vyjede za 2 s; přes přejezd 3 s předzvánění, pak závory a vlak 2 s po nich
+  const ZP = znovu ? (zrusPrejezd ? 5000 : 2000) : 0;
   s.style.transform = `translateX(${-W - 20}px)`; void s.offsetWidth;
-  requestAnimationFrame(() => jed(x1, T, 'cubic-bezier(.25,.55,.35,1)'));
   const tm = []; let raf = 0;
-  tm.push(setTimeout(() => s.classList.remove('jede'), T + 100));                                     // stojí
-  tm.push(setTimeout(() => { nav.classList.remove('stuj'); nav.classList.add('volno'); }, T + STOJI)); // padne volno
+  tm.push(setTimeout(() => requestAnimationFrame(() => jed(x1, T, 'cubic-bezier(.25,.55,.35,1)')), ZP));
+  tm.push(setTimeout(() => s.classList.remove('jede'), ZP + T + 100));                                     // stojí
+  tm.push(setTimeout(() => { nav.classList.remove('stuj'); nav.classList.add('volno'); }, ZP + T + STOJI)); // padne volno
   const odjezd = 2600 + zeme.length * 150;
   tm.push(setTimeout(() => {
     s.dataset.odjizdi = '1';
@@ -964,7 +967,7 @@ function vlakExpedice(e, znovu){
     const lok = s.querySelector('.loko');
     const hlid = () => { if (lok.getBoundingClientRect().left > nav.getBoundingClientRect().right) { nav.classList.remove('volno'); nav.classList.add('stuj'); return; } raf = requestAnimationFrame(hlid); };
     raf = requestAnimationFrame(hlid);                                                                // červená, jakmile lokomotiva projede
-  }, T + STOJI + 800));
+  }, ZP + T + STOJI + 800));
   tm.push(setTimeout(() => { s.classList.remove('jede'); if (stat) stat.textContent = '';
     // easter egg: malé zelené tlačítko vlevo na trati přivolá vlak znovu
     // (u Maliny až po jejím odjezdu)
@@ -974,7 +977,7 @@ function vlakExpedice(e, znovu){
       bt.onclick = ev => { ev.stopPropagation(); zrus(); GC.udalost('vlak-privolan', 'Přivolal vlak');
         box.querySelectorAll('.souprava, .navest, .privolat').forEach(n => n.remove()); vlakExpedice(e, true); };
     });
-  }, T + STOJI + 800 + odjezd + 300));
+  }, ZP + T + STOJI + 800 + odjezd + 300));
   // při odchodu ze stránky časovače zrušit
   const zrus = () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); if (zrusPrejezd) zrusPrejezd(); window.removeEventListener('hashchange', zrus); };
   window.addEventListener('hashchange', zrus);
