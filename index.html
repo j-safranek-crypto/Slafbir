@@ -894,7 +894,8 @@ const malinaSvg = `<svg class="bok" viewBox="0 0 64 28" aria-hidden="true">
   <rect x="17" y="23.4" width="10" height="2.6" fill="#fff"/></svg>`;
 function prejezd(box, s, sirka){
   const cx = Math.round(sirka * .32), sx = cx - 20;
-  box.classList.add('prejezd');
+  box.classList.add('prejezd'); box.dataset.sx = sx;
+  let konec; const odjela = new Promise(r => konec = r);
   box.insertAdjacentHTML('afterbegin', `<div class="silnice" style="left:${sx - 8}px"></div>
     <div class="zavora zad" style="left:${sx - 4}px"><i></i></div>
     <div class="zavora pred" style="left:${sx - 4}px"><i></i></div>
@@ -912,22 +913,36 @@ function prejezd(box, s, sirka){
     tm.push(setTimeout(() => { car.style.zIndex = 5; poloha(sx - 11, 100, 1, 1700, 'cubic-bezier(.4,0,.4,1)'); }, 1500));   // přejede koleje
     tm.push(setTimeout(() => car.classList.add('toc'), 3300));                                                         // otočí se bokem
     tm.push(setTimeout(() => poloha(-90, 100, 1, 2600, 'cubic-bezier(.45,0,.75,.6)'), 3950));                          // odjede doleva
+    tm.push(setTimeout(konec, 6700));
   };
   // čekat, až poslední vagon mine přejezd (při odjezdu vlaku)
   const hlid = () => { if (hotovo) return; const posl = s.querySelector('.souprava > :last-child'), b = box.getBoundingClientRect();
     if (s.dataset.odjizdi && posl.getBoundingClientRect().left - b.left > sx + 46) { tm.push(setTimeout(otevri, 900)); return; }   // jen při odjezdu, nikdy dřív
     raf = requestAnimationFrame(hlid); };
   raf = requestAnimationFrame(hlid);
-  return () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); };
+  const zrus = () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); };
+  zrus.odjela = odjela; return zrus;
+}
+/* přivolaný vlak: přejezd se zase zavře a po průjezdu otevře, Malina už nepřijede (jede jen jednou) */
+function prejezdZnovu(box, s){
+  const sx = +box.dataset.sx, vys = box.querySelector('.vystraznik'), zav = [...box.querySelectorAll('.zavora')];
+  zav.forEach(z => z.classList.remove('nahoru')); vys.classList.remove('otevreno'); vys.classList.add('zavreno');
+  let raf = 0, tm = 0;
+  const hlid = () => { const posl = s.querySelector('.souprava > :last-child'), b = box.getBoundingClientRect();
+    if (s.dataset.odjizdi && posl.getBoundingClientRect().left - b.left > sx + 46) {
+      tm = setTimeout(() => { zav.forEach(z => z.classList.add('nahoru')); vys.classList.remove('zavreno'); vys.classList.add('otevreno'); }, 900); return; }
+    raf = requestAnimationFrame(hlid); };
+  raf = requestAnimationFrame(hlid);
+  return () => { clearTimeout(tm); cancelAnimationFrame(raf); };
 }
 /* vláček v záhlaví expedice: přijede k návěstidlu „Stůj“, 5 s stojí, padne „Volno“ a odjede */
-function vlakExpedice(e){
+function vlakExpedice(e, znovu){
   const box = document.getElementById('vlak'); if (!box) return;
   const zeme = short(e.countries).filter(c => D.vlajky[c]);
   if (!zeme.length) { box.hidden = true; return; }
   box.insertAdjacentHTML('beforeend', soupravaHtml(zeme) + '<div class="navest stuj" title="Návěstidlo"><div class="hl"><i class="c"></i><i class="z"></i></div></div>');
   const s = box.querySelector('.souprava'), nav = box.querySelector('.navest'), W = s.scrollWidth, sirka = box.clientWidth;
-  const zrusPrejezd = MALINA.has(e.id) && !matchMedia('(prefers-reduced-motion: reduce)').matches ? prejezd(box, s, sirka) : null;
+  const zrusPrejezd = MALINA.has(e.id) && !matchMedia('(prefers-reduced-motion: reduce)').matches ? (znovu ? prejezdZnovu(box, s) : prejezd(box, s, sirka)) : null;
   // souprava zastaví zhruba uprostřed (u dlouhé soupravy co nejdál vpravo), návěstidlo stojí kousek před lokomotivou
   const x1 = Math.round(Math.min(sirka - W - 36, (sirka - W) / 2));
   nav.style.right = 'auto'; nav.style.left = (x1 + W + 12) + 'px';
@@ -952,10 +967,13 @@ function vlakExpedice(e){
   }, T + STOJI + 800));
   tm.push(setTimeout(() => { s.classList.remove('jede'); if (stat) stat.textContent = '';
     // easter egg: malé zelené tlačítko vlevo na trati přivolá vlak znovu
-    box.insertAdjacentHTML('beforeend', '<button type="button" class="privolat" aria-label="Přivolat vlak"></button>');
-    const bt = box.querySelector('.privolat'); requestAnimationFrame(() => bt.classList.add('videt'));
-    bt.onclick = ev => { ev.stopPropagation(); zrus(); GC.udalost('vlak-privolan', 'Přivolal vlak');
-      box.className = box.className.replace(/\bprejezd\b/, '').trim(); box.innerHTML = '<div class="trat"></div>'; vlakExpedice(e); };
+    // (u Maliny až po jejím odjezdu)
+    ((zrusPrejezd && zrusPrejezd.odjela) || Promise.resolve()).then(() => { if (!box.isConnected || box.querySelector('.privolat')) return;
+      box.insertAdjacentHTML('beforeend', '<button type="button" class="privolat" aria-label="Přivolat vlak"></button>');
+      const bt = box.querySelector('.privolat'); requestAnimationFrame(() => bt.classList.add('videt'));
+      bt.onclick = ev => { ev.stopPropagation(); zrus(); GC.udalost('vlak-privolan', 'Přivolal vlak');
+        box.querySelectorAll('.souprava, .navest, .privolat').forEach(n => n.remove()); vlakExpedice(e, true); };
+    });
   }, T + STOJI + 800 + odjezd + 300));
   // při odchodu ze stránky časovače zrušit
   const zrus = () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); if (zrusPrejezd) zrusPrejezd(); window.removeEventListener('hashchange', zrus); };
