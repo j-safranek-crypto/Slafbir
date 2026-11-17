@@ -1346,15 +1346,16 @@ function kontaktInit(){
 }
 /* koutky: 12 dvířek na rok 2027. nazev = prozradí se týden před otevřením (do té doby otazník), id = stránka koutku po otevření */
 const KOUTKY = [
-  { mesic: 1, nazev: null, id: null }, { mesic: 2, nazev: null, id: null }, { mesic: 3, nazev: null, id: null }, { mesic: 4, nazev: null, id: null },
+  { mesic: 1, nazev: null, cely: null, id: null }, { mesic: 2, nazev: null, id: null }, { mesic: 3, nazev: null, id: null }, { mesic: 4, nazev: null, id: null },
   { mesic: 5, nazev: null, id: null }, { mesic: 6, nazev: null, id: null }, { mesic: 7, nazev: null, id: null }, { mesic: 8, nazev: null, id: null },
   { mesic: 9, nazev: null, id: null }, { mesic: 10, nazev: null, id: null }, { mesic: 11, nazev: null, id: null }, { mesic: 12, nazev: null, id: null },
 ];
 const MESICE = ['leden','únor','březen','duben','květen','červen','červenec','srpen','září','říjen','listopad','prosinec'];
 const MESICE2 = ['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'];
-/* ukázka jen pro náhled: window.KT_UKAZKA = {ted:'RRRR-MM-DD', nazvy:{mesic:[nazev,id]}}; na webu není */
+/* nazev = krátký na cedulku (Pivní), cely = celý uvnitř dvířek (Pivní koutek); bez cely se použije nazev */
+/* ukázka jen pro náhled: window.KT_UKAZKA = {ted:'RRRR-MM-DD', nazvy:{mesic:[nazev,id,cely]}}; na webu není */
 const KT_UK = window.KT_UKAZKA || null;
-if (KT_UK) Object.entries(KT_UK.nazvy || {}).forEach(([m, [n, id]]) => Object.assign(KOUTKY[m - 1], { nazev: n, id: id || null }));
+if (KT_UK) Object.entries(KT_UK.nazvy || {}).forEach(([m, [n, id, c]]) => Object.assign(KOUTKY[m - 1], { nazev: n, id: id || null, cely: c || null }));
 const koutekStav = (k, ted = KT_UK ? new Date(KT_UK.ted + 'T12:00:00') : new Date()) => {
   const ot = new Date(2027, k.mesic - 1, 1), pred = new Date(ot.getTime() - 7 * 864e5);
   return ted >= ot && k.id ? 'otevreno' : ted >= pred && k.nazev ? 'brzy' : 'zamceno';
@@ -1362,7 +1363,7 @@ const koutekStav = (k, ted = KT_UK ? new Date(KT_UK.ted + 'T12:00:00') : new Dat
 function koutkyPage(){
   const dv = KOUTKY.map((k, i) => { const s = koutekStav(k), m = MESICE[k.mesic - 1];
     return `<div class="bunka"><div class="dv ${s}" data-i="${i}">
-      ${s === 'otevreno' ? `<a class="zaDv" href="#${k.id}" tabindex="-1"><b>${esc(k.nazev)}</b><span>Vstoupit →</span></a>` : `<div class="zaDv" aria-hidden="true"></div>`}
+      ${s === 'otevreno' ? `<a class="zaDv" href="#${k.id}" tabindex="-1"><b>${esc(k.cely || k.nazev)}</b><span>Vstoupit →</span></a>` : `<div class="zaDv" aria-hidden="true"></div>`}
       <button type="button" class="kridlo" aria-label="${m} 2027: ${s === 'zamceno' ? 'zatím zamčeno' : s === 'brzy' ? esc(k.nazev) + ', otevře se 1. ' + MESICE2[k.mesic - 1] : esc(k.nazev) + ', otevřít dvířka'}">
         <span class="q">${m}</span><span class="c">${k.mesic}</span><span class="klika"></span>
         ${s === 'brzy' ? `<span class="stitek">od 1. ${k.mesic}.</span>` : ''}
@@ -1388,11 +1389,11 @@ function koutkyInit(){
   const hl = document.getElementById('ktHl');
   document.querySelectorAll('.kt .dv').forEach(d => { const k = KOUTKY[+d.dataset.i], s = koutekStav(k);
     const kr = d.querySelector('.kridlo'), a = d.querySelector('a.zaDv');
-    if (a && KT_UK) a.onclick = e => { e.preventDefault(); hl.textContent = `Ukázka: tady se vstoupí do koutku „${k.nazev}“.`; };
+    if (a && KT_UK) a.onclick = e => { e.preventDefault(); hl.textContent = `Ukázka: tady se vstoupí do „${k.cely || k.nazev}“.`; };
     kr.onclick = () => {
-      if (s === 'otevreno') { d.classList.add('dokoran'); kr.tabIndex = -1; a.tabIndex = 0; setTimeout(() => a.focus({ preventScroll: true }), 900); hl.textContent = `${MESICE[k.mesic - 1][0].toUpperCase() + MESICE[k.mesic - 1].slice(1)}: ${k.nazev}. Vstupte dál.`; return; }
+      if (s === 'otevreno') { d.classList.add('dokoran'); kr.tabIndex = -1; a.tabIndex = 0; setTimeout(() => a.focus({ preventScroll: true }), 900); hl.textContent = `${MESICE[k.mesic - 1][0].toUpperCase() + MESICE[k.mesic - 1].slice(1)}: ${k.cely || k.nazev}. Vstupte dál.`; return; }
       d.classList.remove('trese'); void d.offsetWidth; d.classList.add('trese');
-      hl.textContent = s === 'brzy' ? `„${k.nazev}“ se otevře 1. ${MESICE2[k.mesic - 1]} 2027.` : `Zamčeno do 1. ${MESICE2[k.mesic - 1]} 2027. Co je uvnitř, prozradíme týden předem.`;
+      hl.textContent = s === 'brzy' ? `„${k.cely || k.nazev}“ se otevře 1. ${MESICE2[k.mesic - 1]} 2027.` : `Zamčeno do 1. ${MESICE2[k.mesic - 1]} 2027. Co je uvnitř, prozradíme týden předem.`;
     };
   });
 }
