@@ -190,6 +190,15 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .hero{overflow:hidden}
 .hero img.dalsi{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.6s ease}
 .hero img.dalsi.on{opacity:1}
+/* rolovací tabule (split-flap) pro čísla */
+.flw{white-space:nowrap}
+.flc{display:inline-block}
+.flc.fl{animation:flipch .1s linear}
+@keyframes flipch{0%{transform:scaleY(1)}45%{transform:scaleY(.08)}55%{transform:scaleY(.08)}100%{transform:scaleY(1)}}
+.zvuk{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:none;border:0;padding:6px 0;cursor:pointer}
+.zvuk:hover{color:var(--ink)}
+.bhead .zvuk{color:var(--board-muted);margin-right:10px}
+.bhead .bpr{display:flex;align-items:center;gap:6px}
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
@@ -377,6 +386,7 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
   <p class="label">Web nepoužívá cookies, návštěvnost se počítá anonymně.</p>
   <nav class="podnav" aria-label="Další stránky">
     <a href="#partneri">Partneři</a>
+    <button type="button" class="zvuk" id="zvukPata">Zvuk tabulí: vyp</button>
     <a class="nahoru" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Nahoru ↑</a>
   </nav>
 </div></footer>
@@ -531,7 +541,7 @@ function flightsHtml(){
   return `<div class="flights" id="lety"><h3>Lety</h3>
     <p class="flnote">Všechny lety z mých cest, od nejnovějšího. Každý přestup se počítá jako samostatný let. Trasy na mapě ukáže tlačítko ✈ Lety.</p>
     <div class="board" aria-labelledby="tbT">
-      <div class="bhead"><div class="t" id="tbT">Odlety <small>Departures</small></div><div class="bclock" id="tbClock" aria-hidden="true">--:--</div></div>
+      <div class="bhead"><div class="t" id="tbT">Odlety <small>Departures</small></div><div class="bpr"><button type="button" class="zvuk" aria-pressed="${KLAP.je()}">${KLAP.popis()}</button><div class="bclock" id="tbClock" aria-hidden="true">--:--</div></div></div>
       <div class="brow hd" aria-hidden="true"><span>Rok</span><span>Odkud</span><span>Kam</span><span style="text-align:right;padding-right:8px">Km</span><span>Stav</span></div>
       <div id="tbRows" role="list"></div>
       <div class="bfoot"><span class="pg" id="tbPg"></span><div class="btns"><button type="button" id="tbPrev">← Novější</button><button type="button" id="tbNext">Starší →</button></div></div>
@@ -572,6 +582,54 @@ function pexesoPage(){
 
   </div></section>`;
 }
+/* rolovací tabule: překlápění znaků a zvuk */
+const KLAP = (() => {
+  const KEY = 'slafbir-zvuk-tabule';
+  let on = false; try { on = localStorage.getItem(KEY) === '1'; } catch(e){}
+  let ctx = null, buf = null, posl = 0;
+  const pripravit = () => { if (ctx) return; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    ctx = new AC(); buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * .03), ctx.sampleRate);
+    const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 6); };
+  function klik(){
+    if (!on || !ctx || ctx.state !== 'running') return;
+    const t = ctx.currentTime; if (t - posl < .028) return; posl = t;
+    const s = ctx.createBufferSource(); s.buffer = buf; s.playbackRate.value = .8 + Math.random() * .5;
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800 + Math.random() * 1400; f.Q.value = 1.2;
+    const g = ctx.createGain(); g.gain.value = .35;
+    s.connect(f).connect(g).connect(ctx.destination); s.start(t);
+  }
+  const popis = () => on ? 'Zvuk tabulí: zap' : 'Zvuk tabulí: vyp';
+  function prepni(){ on = !on; try { localStorage.setItem(KEY, on ? '1' : '0'); } catch(e){}
+    if (on) { pripravit(); if (ctx && ctx.state === 'suspended') ctx.resume(); klik(); }
+    document.querySelectorAll('.zvuk').forEach(b => { b.textContent = popis(); b.setAttribute('aria-pressed', String(on)); }); }
+  // prohlížeč pustí zvuk až po prvním klepnutí návštěvníka
+  ['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, () => { if (on) { pripravit(); if (ctx && ctx.state === 'suspended') ctx.resume(); } }, {passive: true}));
+  document.addEventListener('click', e => { const b = e.target.closest('.zvuk'); if (b) prepni(); });
+  const ZN = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', CI = '0123456789';
+  // překlopí text prvku jako stará nádražní tabule: každý znak projde řadou písmen/číslic až k cíli
+  function preklop(el, zpozdeni = 0){
+    const cil = el.dataset.cil || el.textContent; el.dataset.cil = cil;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = cil; return; }
+    const slova = cil.split(/(\s+)/);
+    el.innerHTML = slova.map(w => /^\s+$/.test(w) ? w : `<span class="flw">${[...w].map(c => `<span class="flc">${c === '<' ? '&lt;' : c === '&' ? '&amp;' : c}</span>`).join('')}</span>`).join('');
+    const ch = [...el.querySelectorAll('.flc')];
+    let hotovo = 0;
+    ch.forEach((s, i) => {
+      const c = s.textContent, up = c.toUpperCase(), sada = /\d/.test(c) ? CI : ZN.includes(up.normalize('NFD')[0]) ? ZN : null;
+      if (!sada) return hotovo++;
+      const cilI = sada.indexOf(/\d/.test(c) ? c : up.normalize('NFD')[0]);
+      const kroku = 3 + Math.floor(Math.random() * Math.min(8, sada.length)), start = (cilI - kroku + sada.length * 3) % sada.length;
+      let k = 0; s.textContent = sada[start];
+      const krok = () => { k++; s.classList.remove('fl'); void s.offsetWidth; s.classList.add('fl'); klik();
+        if (k >= kroku) { s.textContent = c; if (++hotovo === ch.length) setTimeout(() => el.textContent = cil, 150); return; }
+        s.textContent = sada[(start + k) % sada.length]; setTimeout(krok, 70); };
+      setTimeout(krok, zpozdeni + i * 55);
+    });
+    if (hotovo === ch.length) el.textContent = cil;
+  }
+  return {klik, preklop, popis, je: () => on};
+})();
+(() => { const b = document.getElementById('zvukPata'); if (b) { b.textContent = KLAP.popis(); b.setAttribute('aria-pressed', String(KLAP.je())); } })();
 /* oživení stránek */
 const ZIVE = (() => {
   const klid = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -597,12 +655,13 @@ const ZIVE = (() => {
     document.querySelectorAll('.mapsvg .lety').forEach(g => [...g.children].forEach((x, i) => x.style.animationDelay = Math.min(i * 40, 1400) + 'ms'));
   }
   function pocitadla(){
-    document.querySelectorAll('.stats b').forEach(b => {
-      const cil = b.textContent.trim(); if (!/^\d+$/.test(cil)) return;
-      const N = +cil, t0 = performance.now(), T = 900;
-      const krok = t => { const k = Math.min(1, (t - t0) / T); b.textContent = Math.round(N * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(krok); };
-      b.textContent = '0'; requestAnimationFrame(krok);
-    });
+    const el = [...document.querySelectorAll('.stats b, .flnums b')]; if (!el.length) return;
+    el.forEach(b => { b.dataset.cil = b.textContent; b.style.visibility = 'hidden'; });
+    const o = new IntersectionObserver(en => {
+      const vid = en.filter(e => e.isIntersecting).map(e => e.target);
+      vid.forEach((b, i) => { o.unobserve(b); b.style.visibility = ''; KLAP.preklop(b, i * 120); });
+    }, {threshold: .6});
+    el.forEach(b => o.observe(b)); obs.push(o);
   }
   function hero(){
     const h = document.querySelector('.hero'); if (!h) return;
@@ -942,7 +1001,7 @@ const TB = (() => {
     if (!s || reduce()) { el.textContent = T; return; }
     const n = 6 + Math.floor(Math.random() * 6); let k = 0;
     A.push(setTimeout(function krok(){ k++;
-      el.textContent = k >= n ? T : T.split('').map((c, i) => c === ' ' || i < (k / n) * T.length - 1 ? c : ZN[Math.floor(Math.random() * ZN.length)]).join('');
+      KLAP.klik(); el.textContent = k >= n ? T : T.split('').map((c, i) => c === ' ' || i < (k / n) * T.length - 1 ? c : ZN[Math.floor(Math.random() * ZN.length)]).join('');
       if (k < n) A.push(setTimeout(krok, 55)); }, d));
   }
   function ukaz(s){
