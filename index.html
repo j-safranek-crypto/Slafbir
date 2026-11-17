@@ -257,7 +257,11 @@ fl-c.fl{animation:flipch .1s linear}
 .vystraznik.otevreno .bila{animation:blik3 1.6s ease-in-out infinite}
 @keyframes blik3{0%,100%{opacity:.15}50%{opacity:1;box-shadow:0 0 6px 2px rgba(255,255,255,.9)}}
 .malina{position:absolute;width:62px;height:30px;z-index:2;will-change:transform}
-.malina svg{display:block;width:100%;height:100%}
+.malina svg{position:absolute;display:block}
+.malina .bok{left:0;top:2px;width:62px;height:27px;transform:scaleX(0);transition:transform .28s ease-in .26s}
+.malina .zp{left:12px;top:-4px;width:38px;height:30px;transition:transform .26s ease-out}
+.malina.toc .zp{transform:scaleX(0)}
+.malina.toc .bok{transform:scaleX(1)}
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
@@ -713,7 +717,26 @@ function VLAK(poradi, krok){
 }
 /* přejezd: výpravy, na které se jelo Malinou (Škoda Felicia) */
 const MALINA = new Set(['balkan', 'moldavia']);
-const malinaSvg = `<svg viewBox="0 0 62 30" aria-hidden="true"><path d="M4 22 L5 15 Q6 12 10 11 L18 10 L25 3 Q27 2 31 2 L46 2 Q50 2 52 5 L57 12 Q60 13 60 17 L60 22 Z" fill="#b5174d"/><path d="M27 5 L31 4 L39 4 L39 10 L21 10 Z" fill="#dfeef3"/><path d="M41 4 L46 4 Q49 4 50 6 L53 10 L41 10 Z" fill="#dfeef3"/><rect x="4" y="16" width="5" height="3" rx="1" fill="#f6d36b"/><rect x="56" y="16" width="4" height="3" rx="1" fill="#e53b2f"/><circle cx="16" cy="23" r="5.5" fill="#1b1f22"/><circle cx="16" cy="23" r="2.2" fill="#cfd8d4"/><circle cx="48" cy="23" r="5.5" fill="#1b1f22"/><circle cx="48" cy="23" r="2.2" fill="#cfd8d4"/></svg>`;
+// Malina (Škoda Felicia): bok (míří doleva) a pohled zepředu, bez znaku
+const malinaSvg = `<svg class="bok" viewBox="0 0 64 28" aria-hidden="true">
+  <path d="M3 21 L3 15.5 Q3 13 6 12.6 L18 11.2 L25 5 Q26 4 28.5 4 L48.5 4 Q51.5 4.2 53.2 6.4 L58.8 12 Q61.5 13 61.5 16 L61.5 21.5 Z" fill="#b5174d"/>
+  <path d="M26.6 6 L33 6 L33 11 L21.2 11 Z M35 6 L44.2 6 L44.2 11 L35 11 Z M46 6 L49.6 6 Q51.2 6.1 52.2 7.3 L55.6 11 L46 11 Z" fill="#dfeef3"/>
+  <path d="M33.8 5 L33.8 20 M45.1 5 L45.1 20" stroke="#8d1239" stroke-width=".7"/>
+  <rect x="10" y="15.2" width="46" height="1.3" fill="#3a3d40"/>
+  <rect x="2" y="18" width="8" height="3.2" rx="1" fill="#6b6f72"/><rect x="55" y="18" width="7.5" height="3.2" rx="1" fill="#6b6f72"/>
+  <rect x="3.2" y="13.6" width="5" height="2.4" rx=".6" fill="#f3e7a6"/><rect x="59" y="12.4" width="2.4" height="4.2" fill="#e53b2f"/>
+  <rect x="23.4" y="9" width="2.4" height="1.8" rx=".5" fill="#8d1239"/>
+  <circle cx="15" cy="21.5" r="5.6" fill="#1b1f22"/><circle cx="15" cy="21.5" r="2.4" fill="#cfd8d4"/>
+  <circle cx="50" cy="21.5" r="5.6" fill="#1b1f22"/><circle cx="50" cy="21.5" r="2.4" fill="#cfd8d4"/></svg>
+<svg class="zp" viewBox="0 0 44 34" aria-hidden="true">
+  <rect x="4" y="25" width="7" height="8" rx="2" fill="#1b1f22"/><rect x="33" y="25" width="7" height="8" rx="2" fill="#1b1f22"/>
+  <path d="M8.5 3 L35.5 3 Q37 3 37.6 4.5 L40 14 L42 15.5 L42 27 L2 27 L2 15.5 L4 14 L6.4 4.5 Q7 3 8.5 3 Z" fill="#b5174d"/>
+  <path d="M10 5 L34 5 L36.4 13.6 L7.6 13.6 Z" fill="#dfeef3"/>
+  <rect x="0" y="11" width="4" height="3.2" rx="1" fill="#8d1239"/><rect x="40" y="11" width="4" height="3.2" rx="1" fill="#8d1239"/>
+  <rect x="4" y="16.6" width="9.5" height="4.2" rx=".8" fill="#f3e7a6"/><rect x="30.5" y="16.6" width="9.5" height="4.2" rx=".8" fill="#f3e7a6"/>
+  <rect x="15.2" y="16.8" width="13.6" height="4" rx="1" fill="#2b2e31" stroke="#c9cfd1" stroke-width=".8"/>
+  <rect x="1" y="22.6" width="42" height="4.4" rx="1.2" fill="#6b6f72"/>
+  <rect x="17" y="23.4" width="10" height="2.6" fill="#fff"/></svg>`;
 function prejezd(box, s, sirka){
   const cx = Math.round(sirka * .32), sx = cx - 20;
   box.classList.add('prejezd');
@@ -732,7 +755,8 @@ function prejezd(box, s, sirka){
     hotovo = true; zav.forEach(z => z.classList.add('nahoru'));
     vys.classList.remove('zavreno'); vys.classList.add('otevreno');
     tm.push(setTimeout(() => { car.style.zIndex = 5; poloha(sx - 11, 100, 1, 1700, 'cubic-bezier(.4,0,.4,1)'); }, 1500));   // přejede koleje
-    tm.push(setTimeout(() => poloha(-90, 100, 1, 2600, 'cubic-bezier(.45,0,.75,.6)'), 3300));                          // odjede doleva
+    tm.push(setTimeout(() => car.classList.add('toc'), 3300));                                                         // otočí se bokem
+    tm.push(setTimeout(() => poloha(-90, 100, 1, 2600, 'cubic-bezier(.45,0,.75,.6)'), 3950));                          // odjede doleva
   };
   // čekat, až poslední vagon mine přejezd (při odjezdu vlaku)
   const hlid = () => { if (hotovo) return; const posl = s.querySelector('.souprava > :last-child'), b = box.getBoundingClientRect();
