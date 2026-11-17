@@ -222,10 +222,9 @@ fl-c.fl{animation:flipch .1s linear}
 .vlak img{-webkit-user-drag:none;user-drag:none;pointer-events:none}
 .vlak.tah{cursor:grab;touch-action:pan-y}
 .vlak.tah.drzi{cursor:grabbing}
+.vlak-exp{margin-top:14px}
 .vlak-pod{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;min-height:1.4em}
 .vlak-pod .stat{color:var(--ink)}
-.vlak-pod .tip{opacity:0;transition:opacity .4s}
-.vlak.tah + .vlak-pod .tip{opacity:1}
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
@@ -510,7 +509,7 @@ function statyPage(){
       <div class="mapinfo" id="mapInfo" aria-live="polite"><span class="label">Klepni na vybarvený stát</span></div>
     </div>
     <div class="vlak" id="vlak" aria-hidden="true"><div class="trat"></div></div>
-    <div class="vlak-pod" aria-live="polite"><span class="stat" id="vlakStat"></span><span class="tip">← Vláček můžeš posouvat →</span></div>
+    <div class="vlak-pod" aria-live="polite"><span class="stat" id="vlakStat"></span></div>
     <div class="cont">
       ${D.continents.map(([k,list]) => `<div><h3>${esc(k)}<small>${list.length}</small></h3><ul>${list.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`).join('')}
     </div>
@@ -533,6 +532,8 @@ function detail(id){
   return `
   <section class="detail-head"><div class="wrap">
     <a class="back" href="#expedice">← Všechny expedice</a>
+    <div class="vlak vlak-exp" id="vlak" aria-hidden="true"><div class="trat"></div></div>
+    <div class="vlak-pod" aria-live="polite"><span class="stat" id="vlakStat"></span></div>
     <div class="dtitle">${stamp(e)}<div><div class="label">Expedice · ${e.year}</div><h2>${esc(e.name)}</h2></div></div>
     <div class="dmeta"><strong>${esc(e.countries)}</strong>${e.text?`<p>${esc(e.text)}</p>`:''}</div>
   </div></section>
@@ -661,19 +662,33 @@ const KLAP = (() => {
 })();
 (() => { const b = document.getElementById('zvukPata'); if (b) { b.textContent = KLAP.popis(); b.setAttribute('aria-pressed', String(KLAP.je())); } })();
 /* vláček pod mapou: lokomotiva s českou vlajkou, vagony s vlajkami států v pořadí expedic */
+const soupravaHtml = zeme => `<div class="souprava"><div class="loko"><span class="kab"></span><img src="img/vlajky/cz.png" alt="" draggable="false"><span class="komin"></span><span class="nar"></span><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>${zeme.map(c => `<div class="vagon" title="${esc(c)}"><img src="img/vlajky/${D.vlajky[c]}.png" alt="${esc(c)}" decoding="async" draggable="false"></div>`).join('')}</div>`;
 function VLAK(poradi, krok){
   const box = document.getElementById('vlak'); if (!box) return;
   poradi = poradi || [...D.exp].reverse();
   const videno = new Set(), skupiny = poradi.map(e => short(e.countries).filter(c => D.vlajky[c] && !videno.has(c) && videno.add(c)));
   const vagony = skupiny.flat();
-  const html = `<div class="souprava"><div class="loko"><span class="kab"></span><img src="img/vlajky/cz.png" alt="" draggable="false"><span class="komin"></span><span class="nar"></span><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>${vagony.map(c => `<div class="vagon" title="${esc(c)}"><img src="img/vlajky/${D.vlajky[c]}.png" alt="${esc(c)}" decoding="async" draggable="false"></div>`).join('')}</div>`;
-  box.querySelector('.souprava')?.remove(); box.insertAdjacentHTML('beforeend', html);
+  box.querySelector('.souprava')?.remove(); box.insertAdjacentHTML('beforeend', soupravaHtml(vagony));
   const s = box.querySelector('.souprava'), W = s.scrollWidth, lok = s.querySelector('.loko').offsetWidth, vag = 44 + 6, sirka = box.clientWidth;
   const klid = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (klid || !krok) { const xs = Math.min(0, sirka - W); s.style.transform = `translateX(${xs}px)`; tahani(box, s, xs, W); return; }
   const x0 = -W + lok + 8, x1 = x0 + vagony.length * vag, T = Math.round(poradi.length * krok) + 600;
   s.style.transform = `translateX(${x0}px)`; void s.offsetWidth;
   s.style.transition = `transform ${T}ms cubic-bezier(.35,0,.65,1)`; s.classList.add('jede');
+  requestAnimationFrame(() => { s.style.transform = `translateX(${x1}px)`; });
+  setTimeout(() => { s.classList.remove('jede'); s.style.transition = ''; tahani(box, s, x1, W); }, T + 200);
+}
+/* vláček v záhlaví expedice: přijede zleva a zastaví */
+function vlakExpedice(e){
+  const box = document.getElementById('vlak'); if (!box) return;
+  const zeme = short(e.countries).filter(c => D.vlajky[c]);
+  if (!zeme.length) { box.hidden = true; return; }
+  box.insertAdjacentHTML('beforeend', soupravaHtml(zeme));
+  const s = box.querySelector('.souprava'), W = s.scrollWidth, sirka = box.clientWidth, x1 = Math.min(0, sirka - W);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { s.style.transform = `translateX(${x1}px)`; tahani(box, s, x1, W); return; }
+  const T = 1400 + zeme.length * 120;
+  s.style.transform = `translateX(${-W - 20}px)`; void s.offsetWidth;
+  s.style.transition = `transform ${T}ms cubic-bezier(.2,.6,.3,1)`; s.classList.add('jede');
   requestAnimationFrame(() => { s.style.transform = `translateX(${x1}px)`; });
   setTimeout(() => { s.classList.remove('jede'); s.style.transition = ''; tahani(box, s, x1, W); }, T + 200);
 }
@@ -1148,7 +1163,7 @@ let current = [];
 function render(){
   const h = location.hash.slice(1);
   const e = D.exp.find(x=>x.id===h);
-  if(e){ app.innerHTML = detail(h); current = pics(e); window.scrollTo(0,0); }
+  if(e){ app.innerHTML = detail(h); current = pics(e); window.scrollTo(0,0); vlakExpedice(e); }
   else if(h === 'pexeso'){ app.innerHTML = pexesoPage(); current = []; PX(); window.scrollTo(0,0); }
   else if(h === 'partneri'){ app.innerHTML = partneriPage(); current = []; window.scrollTo(0,0); }
   else if(h === 'lukostrelba'){ app.innerHTML = lukPage(); current = []; LK(); window.scrollTo(0,0); }
