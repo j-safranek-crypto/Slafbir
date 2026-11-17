@@ -372,6 +372,12 @@ fl-c.fl{animation:flipch .1s linear}
 .vlak.prejezd .trat{bottom:30px;z-index:1}
 .vlak.prejezd .souprava{bottom:37px;z-index:3}
 .vlak.prejezd .navest{bottom:32px;z-index:4}
+.privolat{position:absolute;left:4px;bottom:13px;width:14px;height:14px;padding:0;border-radius:50%;border:2px solid var(--ink);background:radial-gradient(circle at 40% 35%,#8af0ac,#2fb35c 60%,#1d7a3d);box-shadow:0 0 6px 1px rgba(60,207,110,.55);cursor:pointer;opacity:0;transform:scale(.4);transition:opacity .5s,transform .5s;z-index:7}
+.privolat.videt{opacity:1;transform:none}
+.privolat::before{content:"";position:absolute;inset:-10px}
+.privolat:hover,.privolat:focus-visible{box-shadow:0 0 10px 3px rgba(60,207,110,.85)}
+.privolat:active{transform:scale(.88)}
+.vlak.prejezd .privolat{bottom:39px}
 .silnice{position:absolute;top:0;bottom:0;width:56px;background:color-mix(in srgb,var(--line) 70%,transparent);clip-path:polygon(32% 0,68% 0,100% 100%,0 100%);z-index:0}
 .silnice::after{content:"";position:absolute;left:27px;top:0;bottom:0;width:2px;background:repeating-linear-gradient(var(--paper) 0 6px,transparent 6px 12px)}
 .zavora{position:absolute;width:52px;height:20px}
@@ -944,7 +950,13 @@ function vlakExpedice(e){
     const hlid = () => { if (lok.getBoundingClientRect().left > nav.getBoundingClientRect().right) { nav.classList.remove('volno'); nav.classList.add('stuj'); return; } raf = requestAnimationFrame(hlid); };
     raf = requestAnimationFrame(hlid);                                                                // červená, jakmile lokomotiva projede
   }, T + STOJI + 800));
-  tm.push(setTimeout(() => { s.classList.remove('jede'); if (stat) stat.textContent = ''; }, T + STOJI + 800 + odjezd + 300));
+  tm.push(setTimeout(() => { s.classList.remove('jede'); if (stat) stat.textContent = '';
+    // easter egg: malé zelené tlačítko vlevo na trati přivolá vlak znovu
+    box.insertAdjacentHTML('beforeend', '<button type="button" class="privolat" aria-label="Přivolat vlak"></button>');
+    const bt = box.querySelector('.privolat'); requestAnimationFrame(() => bt.classList.add('videt'));
+    bt.onclick = ev => { ev.stopPropagation(); zrus(); GC.udalost('vlak-privolan', 'Přivolal vlak');
+      box.className = box.className.replace(/\bprejezd\b/, '').trim(); box.innerHTML = '<div class="trat"></div>'; vlakExpedice(e); };
+  }, T + STOJI + 800 + odjezd + 300));
   // při odchodu ze stránky časovače zrušit
   const zrus = () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); if (zrusPrejezd) zrusPrejezd(); window.removeEventListener('hashchange', zrus); };
   window.addEventListener('hashchange', zrus);
