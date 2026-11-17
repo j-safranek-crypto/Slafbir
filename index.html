@@ -191,9 +191,9 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .hero img.dalsi{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.6s ease}
 .hero img.dalsi.on{opacity:1}
 /* rolovací tabule (split-flap) pro čísla */
-.flw{white-space:nowrap}
-.flc{display:inline-block}
-.flc.fl{animation:flipch .1s linear}
+fl-w{display:inline;white-space:nowrap;margin:0;font:inherit;color:inherit}
+fl-c{display:inline-block;margin:0;font:inherit;color:inherit}
+fl-c.fl{animation:flipch .1s linear}
 @keyframes flipch{0%{transform:scaleY(1)}45%{transform:scaleY(.08)}55%{transform:scaleY(.08)}100%{transform:scaleY(1)}}
 .zvuk{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:none;border:0;padding:6px 0;cursor:pointer}
 .zvuk:hover{color:var(--ink)}
@@ -611,18 +611,19 @@ const KLAP = (() => {
     const cil = el.dataset.cil || el.textContent; el.dataset.cil = cil;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = cil; return; }
     const slova = cil.split(/(\s+)/);
-    el.innerHTML = slova.map(w => /^\s+$/.test(w) ? w : `<span class="flw">${[...w].map(c => `<span class="flc">${c === '<' ? '&lt;' : c === '&' ? '&amp;' : c}</span>`).join('')}</span>`).join('');
-    const ch = [...el.querySelectorAll('.flc')];
+    el.innerHTML = slova.map(w => /^\s+$/.test(w) ? w : `<fl-w>${[...w].map(c => `<fl-c>${c === '<' ? '&lt;' : c === '&' ? '&amp;' : c}</fl-c>`).join('')}</fl-w>`).join('');
+    const ch = [...el.querySelectorAll('fl-c')];
     let hotovo = 0;
     ch.forEach((s, i) => {
       const c = s.textContent, up = c.toUpperCase(), sada = /\d/.test(c) ? CI : ZN.includes(up.normalize('NFD')[0]) ? ZN : null;
       if (!sada) return hotovo++;
       const cilI = sada.indexOf(/\d/.test(c) ? c : up.normalize('NFD')[0]);
       const kroku = 3 + Math.floor(Math.random() * Math.min(8, sada.length)), start = (cilI - kroku + sada.length * 3) % sada.length;
-      let k = 0; s.textContent = sada[start];
+      const mala = c !== up, zn = x => mala ? x.toLowerCase() : x;
+      let k = 0; s.textContent = zn(sada[start]);
       const krok = () => { k++; s.classList.remove('fl'); void s.offsetWidth; s.classList.add('fl'); klik();
         if (k >= kroku) { s.textContent = c; if (++hotovo === ch.length) setTimeout(() => el.textContent = cil, 150); return; }
-        s.textContent = sada[(start + k) % sada.length]; setTimeout(krok, 70); };
+        s.textContent = zn(sada[(start + k) % sada.length]); setTimeout(krok, 70); };
       setTimeout(krok, zpozdeni + i * 55);
     });
     if (hotovo === ch.length) el.textContent = cil;
