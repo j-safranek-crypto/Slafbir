@@ -210,6 +210,7 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .kt .cedule span{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
 .kt .mriz{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
 @media (max-width:560px){.kt .mriz{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:900px){.kt .pivovar{max-width:940px}.kt .mriz{grid-template-columns:repeat(6,minmax(0,1fr))}.kt .hlaska{max-width:940px}.kt .strecha{height:96px}.kt .komin{right:16%}}
 .kt .bunka{display:flex;flex-direction:column;align-items:center;padding:6px 0 12px;border-bottom:7px solid var(--kamen);min-width:0}
 .kt .dv{position:relative;width:54%;aspect-ratio:3/4.6;perspective:700px;border-radius:50% 50% 2px 2px / 32% 32% 2px 2px;box-shadow:0 0 0 5px var(--kamen),0 0 0 6.5px rgba(0,0,0,.25)}
 @media (max-width:560px){.kt .dv{width:62%}}
@@ -223,7 +224,11 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .kt .kridlo .klika{position:absolute;right:13%;top:58%;width:7px;height:7px;border-radius:50%;background:var(--mosaz);box-shadow:0 0 0 1.5px #6b4a12}
 .kt .kridlo .stitek{position:absolute;right:-30%;top:66%;transform:rotate(-8deg);transform-origin:90% 0;background:#f2e3b3;color:#3b2a10;font-family:var(--mono);font-size:.55rem;letter-spacing:.04em;text-transform:uppercase;padding:3px 5px;border-radius:2px;box-shadow:0 2px 4px rgba(0,0,0,.3);white-space:nowrap;z-index:2}
 .kt .kridlo .stitek::before{content:"";position:absolute;right:42%;top:-8px;width:1px;height:9px;background:#7a6a4a}
-.kt .dv.otevreno .kridlo{transform:rotateY(-80deg)}
+.kt .dv.otevreno.dokoran .kridlo{transform:rotateY(-80deg)}
+.kt .dv.otevreno:not(.dokoran){box-shadow:0 0 0 5px var(--kamen),0 0 0 6.5px rgba(0,0,0,.25),0 6px 14px -4px rgba(255,190,70,.75)}
+.kt .dv.otevreno:not(.dokoran) .kridlo{box-shadow:inset 0 0 0 2px rgba(0,0,0,.35),inset 0 -3px 0 #ffd36b}
+.kt .dv.otevreno:not(.dokoran) .kridlo:hover{transform:rotateY(-9deg)}
+.kt .dv.otevreno:not(.dokoran) .zaDv{pointer-events:none}
 .kt .dv.zamceno .kridlo:hover .klika,.kt .dv.zamceno .kridlo:focus-visible .klika{animation:klika .5s ease}
 @keyframes klika{20%{transform:translateY(2px)}40%{transform:none}60%{transform:translateY(1px)}100%{transform:none}}
 .kt .dv.trese .kridlo{animation:trese .45s ease}
@@ -1346,15 +1351,18 @@ const KOUTKY = [
 ];
 const MESICE = ['leden','únor','březen','duben','květen','červen','červenec','srpen','září','říjen','listopad','prosinec'];
 const MESICE2 = ['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'];
-const koutekStav = (k, ted = new Date()) => {
+/* ukázka jen pro náhled: window.KT_UKAZKA = {ted:'RRRR-MM-DD', nazvy:{mesic:[nazev,id]}}; na webu není */
+const KT_UK = window.KT_UKAZKA || null;
+if (KT_UK) Object.entries(KT_UK.nazvy || {}).forEach(([m, [n, id]]) => Object.assign(KOUTKY[m - 1], { nazev: n, id: id || null }));
+const koutekStav = (k, ted = KT_UK ? new Date(KT_UK.ted + 'T12:00:00') : new Date()) => {
   const ot = new Date(2027, k.mesic - 1, 1), pred = new Date(ot.getTime() - 7 * 864e5);
   return ted >= ot && k.id ? 'otevreno' : ted >= pred && k.nazev ? 'brzy' : 'zamceno';
 };
 function koutkyPage(){
   const dv = KOUTKY.map((k, i) => { const s = koutekStav(k), m = MESICE[k.mesic - 1];
     return `<div class="bunka"><div class="dv ${s}" data-i="${i}">
-      ${s === 'otevreno' ? `<a class="zaDv" href="#${k.id}"><b>${esc(k.nazev)}</b><span>Vstoupit →</span></a>` : `<div class="zaDv" aria-hidden="true"></div>`}
-      <button type="button" class="kridlo" aria-label="${m} 2027: ${s === 'zamceno' ? 'zatím zamčeno' : s === 'brzy' ? esc(k.nazev) + ', otevře se 1. ' + MESICE2[k.mesic - 1] : esc(k.nazev)}"${s === 'otevreno' ? ' tabindex="-1"' : ''}>
+      ${s === 'otevreno' ? `<a class="zaDv" href="#${k.id}" tabindex="-1"><b>${esc(k.nazev)}</b><span>Vstoupit →</span></a>` : `<div class="zaDv" aria-hidden="true"></div>`}
+      <button type="button" class="kridlo" aria-label="${m} 2027: ${s === 'zamceno' ? 'zatím zamčeno' : s === 'brzy' ? esc(k.nazev) + ', otevře se 1. ' + MESICE2[k.mesic - 1] : esc(k.nazev) + ', otevřít dvířka'}">
         ${s === 'zamceno' ? '<span class="q">?</span>' : ''}<span class="c">${k.mesic}</span><span class="klika"></span>
         ${s === 'brzy' ? `<span class="stitek">${esc(k.nazev)}</span>` : ''}
       </button></div><span class="cedulka">${m}</span></div>`; }).join('');
@@ -1378,8 +1386,10 @@ function koutkyPage(){
 function koutkyInit(){
   const hl = document.getElementById('ktHl');
   document.querySelectorAll('.kt .dv').forEach(d => { const k = KOUTKY[+d.dataset.i], s = koutekStav(k);
-    d.querySelector('.kridlo').onclick = () => {
-      if (s === 'otevreno') { location.hash = k.id; return; }
+    const kr = d.querySelector('.kridlo'), a = d.querySelector('a.zaDv');
+    if (a && KT_UK) a.onclick = e => { e.preventDefault(); hl.textContent = `Ukázka: tady se vstoupí do koutku „${k.nazev}“.`; };
+    kr.onclick = () => {
+      if (s === 'otevreno') { d.classList.add('dokoran'); kr.tabIndex = -1; a.tabIndex = 0; setTimeout(() => a.focus({ preventScroll: true }), 900); hl.textContent = `${MESICE[k.mesic - 1][0].toUpperCase() + MESICE[k.mesic - 1].slice(1)}: ${k.nazev}. Vstupte dál.`; return; }
       d.classList.remove('trese'); void d.offsetWidth; d.classList.add('trese');
       hl.textContent = s === 'brzy' ? `${k.nazev}: otevře se 1. ${MESICE2[k.mesic - 1]} 2027.` : `Zamčeno do 1. ${MESICE2[k.mesic - 1]} 2027. Co je uvnitř, prozradíme týden předem.`;
     };
