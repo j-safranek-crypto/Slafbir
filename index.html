@@ -648,9 +648,13 @@ const ZIVE = (() => {
     st.forEach(s => o.observe(s)); obs.push(o);
   }
   function mapa(){
+    // státy se vybarví v pořadí expedic, od nejstarší po nejnovější; státy jedné výpravy naráz
     const svg = document.querySelector('.mapsvg:not([hidden])'); if (!svg) return;
-    const v = [...svg.querySelectorAll('.v')].map(x => { let bx = 0; try { const b = x.getBBox(); bx = b.x + b.width / 2; } catch(e){} return [bx, x]; }).sort((a, b) => a[0] - b[0]);
-    const n = v.length; v.forEach(([, x], i) => { x.style.animationDelay = Math.round(i / n * 1600) + 'ms'; x.classList.add('vyb'); });
+    const N = D.exp.length, krok = Math.min(160, 3200 / N);
+    svg.querySelectorAll('.v').forEach(x => {
+      const tr = tripsBy[x.dataset.cz] || []; const nejst = Math.max(...tr.map(e => D.exp.indexOf(e)), 0);
+      x.style.animationDelay = Math.round((N - 1 - nejst) * krok) + 'ms'; x.classList.add('vyb');
+    });
   }
   function lety(){
     document.querySelectorAll('.mapsvg .lety').forEach(g => [...g.children].forEach((x, i) => x.style.animationDelay = Math.min(i * 40, 1400) + 'ms'));
