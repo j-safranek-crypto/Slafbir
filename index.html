@@ -1471,7 +1471,9 @@ const LK = (() => {
     $('kZ').textContent = zelena === 3 ? 'Dal sis 7 piv a 1 zelenou.' : zelena === 2 ? 'Sedm piv a půlka zelené.' : zelena != null ? 'Sedm piv, zelená tentokrát nevyšla.' : `Na zelenou je potřeba aspoň ${ZEL_OD} bodů ze střelby.`;
     $('kB').textContent = soucet; $('kH').textContent = h; $('kP').textContent = p;
     const o = $('kO'); o.hidden = false;
-    if (soucet >= LIMIT && !uz) { try { localStorage.setItem(LK_KEY, tyden()); } catch(e){}
+    GC.udalost('lukostrelba-dohrano', 'Lukostřelba dohrána');
+    if (zelena != null) GC.udalost('lukostrelba-zelena', 'Lukostřelba: hrál na zelenou');
+    if (soucet >= LIMIT && !uz) { try { localStorage.setItem(LK_KEY, tyden()); } catch(e){} GC.udalost('lukostrelba-odemceno', 'Lukostřelba: odemkl skryté fotky');
       o.innerHTML = `Gratuluju! Odemkl jsi ${SK.size} skrytých fotek. Najdeš je v albech jednotlivých <a href="#expedice">expedic</a>. Odemčené zůstanou do neděle, v pondělí se zase zamknou.`;
       $('lkCil').textContent = 'Skryté fotky v albech máš tento týden odemčené. V pondělí se zase zamknou. Hraj dál o rekord.'; }
     else if (uz) o.textContent = 'Skryté fotky už máš tento týden odemčené.';
@@ -1600,7 +1602,7 @@ function konec(){
   if (!rek || tahy < rek.t || (tahy === rek.t && sek < rek.s)) { store.set(k, {t: tahy, s: sek}); t = rek ? 'Nový rekord!' : 'Tvůj první rekord na téhle obtížnosti.'; }
   else t = `Tvůj rekord: ${rek.t} tahů za ${fmt(rek.s)}`;
   $('kR').textContent = t;
-  $('konec').hidden = false;
+  $('konec').hidden = false; GC.udalost('pexeso-dohrano', 'Pexeso dohráno');
   $('konec').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest'});
 }
 
@@ -1705,6 +1707,27 @@ const MAIL = () => ['j-safranek', 'email.cz'].join('@');
 const mailDo = a => { if (a) { a.href = 'mailto:' + MAIL(); a.textContent = MAIL(); } };
 mailDo(document.getElementById('mail'));
 let current = [];
+/* návštěvnost (GoatCounter, bez cookies): každá stránka webu zvlášť, např. /mezopotamie, a dohrané hry jako události */
+const GC = (() => {
+  const NAZVY = { '': 'Úvod', expedice: 'Expedice', staty: 'Státy', lety: 'Státy', album: 'Fotoalbum', pexeso: 'Pexeso', lukostrelba: 'Lukostřelba', partneri: 'Partneři', kontakt: 'Kontakt' };
+  const posli = (vars, pokus = 0) => {
+    const g = window.goatcounter;
+    if (g && g.count) { try { g.count(vars); } catch(e){} return; }
+    if (pokus < 20) setTimeout(() => posli(vars, pokus + 1), 500);   // count.js se načítá až po stránce
+  };
+  let posledni = null;
+  return {
+    stranka(){
+      const h = location.hash.slice(1); if (h === 'toggle-goatcounter') return;
+      const e = D.exp.find(x => x.id === h), path = '/' + (e || NAZVY[h] !== undefined ? h : '');
+      if (path === posledni) return; posledni = path;
+      const title = e ? 'Expedice ' + e.name : (NAZVY[h] || 'Úvod');
+      if (document.visibilityState === 'hidden') { const f = () => { if (document.visibilityState !== 'visible') return; document.removeEventListener('visibilitychange', f); posli({ path, title }); }; document.addEventListener('visibilitychange', f); }
+      else posli({ path, title });
+    },
+    udalost(path, title){ posli({ path, title, event: true }); }
+  };
+})();
 function render(){
   const h = location.hash.slice(1);
   const e = D.exp.find(x=>x.id===h);
@@ -1718,7 +1741,7 @@ function render(){
     if(h === 'lety'){ const t = document.getElementById('lety'); if(t) t.scrollIntoView(); } else window.scrollTo(0,0); }
   else if(h === 'album'){ app.innerHTML = albumPage(); current = D.album; window.scrollTo(0,0); }
   else { app.innerHTML = home(); current = []; window.scrollTo(0,0); }
-  ZIVE();
+  ZIVE(); GC.stranka();
   const sekce = e ? 'expedice' : h === 'lety' ? 'staty' : h;
   document.querySelectorAll('.nav a').forEach(a => { if (a.getAttribute('href') === '#' + sekce) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
 }
@@ -1740,6 +1763,6 @@ lb.addEventListener('touchstart', ev => tx = ev.touches[0].clientX, {passive:tru
 lb.addEventListener('touchend', ev => { if(tx===null) return; const dx = ev.changedTouches[0].clientX - tx; if(Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1)); tx = null; });
 </script>
 
-<script data-goatcounter="https://slafbir.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://slafbir.goatcounter.com/count" data-goatcounter-settings='{"no_onload": true}' async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
