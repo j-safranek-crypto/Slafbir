@@ -225,6 +225,14 @@ fl-c.fl{animation:flipch .1s linear}
 .vlak-exp{margin-top:14px}
 .vlak-pod{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;min-height:1.4em}
 .vlak-pod .stat{color:var(--ink)}
+/* návěstidlo u vláčku v expedici */
+.navest{position:absolute;right:6px;bottom:6px;width:18px;height:62px;pointer-events:none}
+.navest::before{content:"";position:absolute;left:7px;bottom:0;width:4px;height:36px;background:var(--ink)}
+.navest .hl{position:absolute;left:0;top:0;width:18px;height:30px;background:var(--ink);border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:space-evenly}
+.navest .hl i{width:9px;height:9px;border-radius:50%;opacity:.22;transition:opacity .25s,box-shadow .25s}
+.navest .hl .c{background:#e53b2f}.navest .hl .z{background:#3ccf6e}
+.navest.stuj .hl .c{opacity:1;box-shadow:0 0 6px 2px rgba(229,59,47,.75)}
+.navest.volno .hl .z{opacity:1;box-shadow:0 0 6px 2px rgba(60,207,110,.75)}
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
@@ -678,19 +686,31 @@ function VLAK(poradi, krok){
   requestAnimationFrame(() => { s.style.transform = `translateX(${x1}px)`; });
   setTimeout(() => { s.classList.remove('jede'); s.style.transition = ''; tahani(box, s, x1, W); }, T + 200);
 }
-/* vláček v záhlaví expedice: přijede zleva a zastaví */
+/* vláček v záhlaví expedice: přijede k návěstidlu „Stůj“, 5 s stojí, padne „Volno“ a odjede */
 function vlakExpedice(e){
   const box = document.getElementById('vlak'); if (!box) return;
   const zeme = short(e.countries).filter(c => D.vlajky[c]);
   if (!zeme.length) { box.hidden = true; return; }
-  box.insertAdjacentHTML('beforeend', soupravaHtml(zeme));
-  const s = box.querySelector('.souprava'), W = s.scrollWidth, sirka = box.clientWidth, x1 = Math.min(0, sirka - W);
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { s.style.transform = `translateX(${x1}px)`; tahani(box, s, x1, W); return; }
-  const T = 1400 + zeme.length * 120;
+  box.insertAdjacentHTML('beforeend', soupravaHtml(zeme) + '<div class="navest stuj" title="Návěstidlo"><div class="hl"><i class="c"></i><i class="z"></i></div></div>');
+  const s = box.querySelector('.souprava'), nav = box.querySelector('.navest'), W = s.scrollWidth, sirka = box.clientWidth;
+  const x1 = sirka - W - 36;   // čelo lokomotivy zastaví kousek před návěstidlem
+  const stat = document.getElementById('vlakStat');
+  box.onclick = ev => { const el = document.elementsFromPoint(ev.clientX, ev.clientY).find(n => n.classList && (n.classList.contains('vagon') || n.classList.contains('loko')));
+    if (el && stat) stat.textContent = el.classList.contains('loko') ? 'Česko – domov' : el.title; };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { s.style.transform = `translateX(${x1}px)`; return; }
+  const jed = (x, ms, kriv) => { s.style.transition = `transform ${ms}ms ${kriv}`; s.classList.add('jede'); s.style.transform = `translateX(${x}px)`; };
+  const T = 1600 + zeme.length * 120;
   s.style.transform = `translateX(${-W - 20}px)`; void s.offsetWidth;
-  s.style.transition = `transform ${T}ms cubic-bezier(.2,.6,.3,1)`; s.classList.add('jede');
-  requestAnimationFrame(() => { s.style.transform = `translateX(${x1}px)`; });
-  setTimeout(() => { s.classList.remove('jede'); s.style.transition = ''; tahani(box, s, x1, W); }, T + 200);
+  requestAnimationFrame(() => jed(x1, T, 'cubic-bezier(.2,.6,.3,1)'));
+  const tm = [];
+  tm.push(setTimeout(() => s.classList.remove('jede'), T + 100));                                   // stojí
+  tm.push(setTimeout(() => { nav.classList.remove('stuj'); nav.classList.add('volno'); }, T + 5000)); // padne volno
+  const odjezd = 2600 + zeme.length * 150;
+  tm.push(setTimeout(() => jed(sirka + 40, odjezd, 'cubic-bezier(.55,0,.85,.6)'), T + 5800));        // rozjede se a odjede
+  tm.push(setTimeout(() => { s.classList.remove('jede'); nav.classList.remove('volno'); nav.classList.add('stuj'); if (stat) stat.textContent = ''; }, T + 5800 + odjezd + 300));
+  // při odchodu ze stránky časovače zrušit
+  const zrus = () => { tm.forEach(clearTimeout); window.removeEventListener('hashchange', zrus); };
+  window.addEventListener('hashchange', zrus);
 }
 /* posouvání vláčku myší nebo prstem; klepnutí na vagon ukáže název státu */
 function tahani(box, s, x, W){
