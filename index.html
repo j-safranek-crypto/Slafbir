@@ -909,7 +909,7 @@ function prejezd(box, s, sirka){
   };
   // čekat, až poslední vagon mine přejezd (při odjezdu vlaku)
   const hlid = () => { if (hotovo) return; const posl = s.querySelector('.souprava > :last-child'), b = box.getBoundingClientRect();
-    if (posl.getBoundingClientRect().left - b.left > sx + 46) { tm.push(setTimeout(otevri, 900)); return; }
+    if (s.dataset.odjizdi && posl.getBoundingClientRect().left - b.left > sx + 46) { tm.push(setTimeout(otevri, 900)); return; }   // jen při odjezdu, nikdy dřív
     raf = requestAnimationFrame(hlid); };
   raf = requestAnimationFrame(hlid);
   return () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); };
@@ -922,7 +922,9 @@ function vlakExpedice(e){
   box.insertAdjacentHTML('beforeend', soupravaHtml(zeme) + '<div class="navest stuj" title="Návěstidlo"><div class="hl"><i class="c"></i><i class="z"></i></div></div>');
   const s = box.querySelector('.souprava'), nav = box.querySelector('.navest'), W = s.scrollWidth, sirka = box.clientWidth;
   const zrusPrejezd = MALINA.has(e.id) && !matchMedia('(prefers-reduced-motion: reduce)').matches ? prejezd(box, s, sirka) : null;
-  const x1 = sirka - W - 36;   // čelo lokomotivy zastaví kousek před návěstidlem
+  // souprava zastaví zhruba uprostřed (u dlouhé soupravy co nejdál vpravo), návěstidlo stojí kousek před lokomotivou
+  const x1 = Math.round(Math.min(sirka - W - 36, (sirka - W) / 2));
+  nav.style.right = 'auto'; nav.style.left = (x1 + W + 12) + 'px';
   const stat = document.getElementById('vlakStat');
   box.onclick = ev => { const el = document.elementsFromPoint(ev.clientX, ev.clientY).find(n => n.classList && (n.classList.contains('vagon') || n.classList.contains('loko')));
     if (el && stat) stat.textContent = el.classList.contains('loko') ? 'Česko – domov' : el.title; };
