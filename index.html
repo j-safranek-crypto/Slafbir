@@ -59,6 +59,8 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .px .hraci span{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 12px;border:2px solid var(--line);border-radius:3px;transition:border-color .25s,color .25s}
 .px .hraci span::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--hc)}
 .px .hraci span.na{border-color:var(--hc);color:var(--ink)}
+.px .hraci .jm{font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit;background:none;border:0;border-bottom:1px dashed color-mix(in srgb,currentColor 45%,transparent);padding:0 1px;min-width:0;max-width:14ch;border-radius:0}
+.px .hraci .jm:focus{outline:none;border-bottom:1px solid var(--hc);color:var(--ink)}
 .px .hraci b{font-family:var(--display);font-size:1.3rem;font-weight:800;color:var(--ink);letter-spacing:0;font-variant-numeric:tabular-nums}
 .px.vice .jen1{display:none}
 .px .stat b{font-family:var(--display);font-size:1.6rem;font-weight:800;color:var(--ink);letter-spacing:0;margin-left:4px;font-variant-numeric:tabular-nums}
@@ -107,6 +109,9 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 
 .px{padding-block:40px 64px}
 .px .wrap{max-width:760px;display:flex;flex-direction:column;gap:20px}
+/* na širokém okně víc sloupců, ať se pexeso vejde bez dlouhého posouvání */
+@media (min-width:700px){.px .grid[data-k="12"]{grid-template-columns:repeat(6,minmax(0,1fr))}.px .grid[data-k="20"]{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (min-width:960px){.px .wrap{max-width:1180px}.px .intro{max-width:62ch}.px .grid[data-k="16"]{grid-template-columns:repeat(8,minmax(0,1fr))}.px .grid[data-k="20"]{grid-template-columns:repeat(10,minmax(0,1fr))}}
 .px h1{font-size:clamp(2.8rem,10vw,4.6rem);font-weight:900}
 .px .intro{max-width:52ch;margin:8px 0 0;color:var(--muted)}
 
@@ -1736,10 +1741,23 @@ const store = {
 let pairs = 8, deck = [], open = [], lock = false, tahy = 0, nalez = 0, start = 0, tik = null;
 let hraci = 1, na = 0, skore = [];   // víc hráčů na jednom zařízení: kdo najde pár, hraje dál; při chybě je na tahu další
 const parySlovo = n => n === 1 ? 'pár' : n >= 2 && n <= 4 ? 'páry' : 'párů';
-function tabule(){
+const JM_KEY = 'pexeso-jmena';
+let jmena = (() => { const j = store.get(JM_KEY); return Array.from({length: 4}, (_, i) => (Array.isArray(j) && typeof j[i] === 'string' && j[i].trim()) ? j[i].trim().slice(0, 14) : 'Hráč ' + (i + 1)); })();
+const jm = i => jmena[i];
+// přehled hráčů: jméno jde přepsat (pamatuje si ho prohlížeč), skóre a kdo je na tahu se jen přepisují
+function tabule(nove){
   const el = $('hraci'); el.hidden = hraci < 2; document.querySelector('.px').classList.toggle('vice', hraci > 1);
   if (hraci < 2) return;
-  el.innerHTML = skore.map((s, i) => `<span class="${i === na ? 'na' : ''}" style="--hc:var(--h${i + 1})"${i === na ? ' aria-current="true"' : ''}>Hráč ${i + 1}<b>${s}</b></span>`).join('');
+  if (nove || el.children.length !== hraci) {
+    el.innerHTML = skore.map((s, i) => `<span style="--hc:var(--h${i + 1})"><input class="jm" value="${esc(jm(i))}" maxlength="14" size="${Math.max(4, jm(i).length)}" aria-label="Jméno hráče ${i + 1}" spellcheck="false"><b>0</b></span>`).join('');
+    el.querySelectorAll('.jm').forEach((inp, i) => {
+      inp.oninput = () => { inp.size = Math.max(4, inp.value.length); };
+      inp.onchange = () => { jmena[i] = inp.value.trim().slice(0, 14) || 'Hráč ' + (i + 1); inp.value = jmena[i]; inp.size = Math.max(4, jmena[i].length); store.set(JM_KEY, jmena); };
+      inp.onkeydown = e => { if (e.key === 'Enter') inp.blur(); };
+    });
+  }
+  [...el.children].forEach((sp, i) => { sp.classList.toggle('na', i === na); sp.querySelector('b').textContent = skore[i];
+    if (i === na) sp.setAttribute('aria-current', 'true'); else sp.removeAttribute('aria-current'); });
 }
 
 function hlaska(t, p){
@@ -1758,10 +1776,11 @@ function nova(){
   $('fnd').textContent = '—'; $('konec').hidden = true;
   document.querySelectorAll('.px .lvl button[data-p]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.p === pairs)));
   document.querySelectorAll('#pocet button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.h === hraci)));
-  na = 0; skore = Array(hraci).fill(0); tabule();
+  na = 0; skore = Array(hraci).fill(0); tabule(true);
   rubPoradi = shuffle(NAZDRAVI.slice());
   const vyber = shuffle(FOTO.slice()).slice(0, pairs);
   deck = shuffle(vyber.flatMap((f, i) => [{f, i}, {f, i}]));
+  $('grid').dataset.k = deck.length;
   $('grid').innerHTML = deck.map((c, n) =>
     `<button type="button" class="card" data-n="${n}" aria-label="Karta ${n + 1}">
       <span class="in">
@@ -1800,9 +1819,10 @@ function konec(){
   if (hraci > 1) {
     const max = Math.max(...skore), vit = skore.map((s, i) => s === max ? i + 1 : 0).filter(Boolean);
     $('kT').textContent = max; $('kJ').textContent = parySlovo(max);
-    $('kH').textContent = vit.length > 1 ? 'Remíza' : `Vyhrál Hráč ${vit[0]}`;
-    $('kP').textContent = vit.length > 1 ? `Dělí se hráči ${vit.join(' a ')}. Na zdraví všem!` : 'Na zdraví! Ostatní platí další rundu.';
-    $('kR').textContent = skore.map((s, i) => `Hráč ${i + 1}: ${s} ${parySlovo(s)}`).join(' · ');
+    const vj = vit.map(v => jm(v - 1));
+    $('kH').textContent = vit.length > 1 ? 'Remíza' : `${vj[0]} vyhrává!`;
+    $('kP').textContent = vit.length > 1 ? `O vítězství se dělí ${vj.slice(0, -1).join(', ')} a ${vj[vj.length - 1]}. Na zdraví všem!` : 'Na zdraví! Ostatní platí další rundu.';
+    $('kR').textContent = skore.map((s, i) => `${jm(i)}: ${s} ${parySlovo(s)}`).join(' · ');
     $('konec').hidden = false; GC.udalost('pexeso-dohrano-vice', 'Pexeso dohráno ve více hráčích');
     $('konec').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest'});
     return;
