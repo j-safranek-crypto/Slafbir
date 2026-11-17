@@ -952,8 +952,8 @@ function letMapa(e){
         const t1 = performance.now(), ZVED = 600;
         const zved = now => { if (g !== gen) return; const k = Math.min(1, (now - t1) / ZVED);
           pivo.style.transform = `translate3d(${x}px,${y + DOL * (1 - k)}px,0) rotate(${Math.sin(k * 12) * 10 * (1 - k)}deg)`;
-          if (k < 1) raf = requestAnimationFrame(zved); else { setTimeout(() => kusy.concat(louze).forEach(n => n.remove()), 2500); tm = setTimeout(dal, 350); } };
-        raf = requestAnimationFrame(zved); }, 1700);
+          if (k < 1) raf = requestAnimationFrame(zved); else { setTimeout(() => kusy.concat(louze).forEach(n => n.remove()), 2500); tm = setTimeout(dal, 2000); } };
+        raf = requestAnimationFrame(zved); }, 3000);
     };
     raf = requestAnimationFrame(pad);
   }
