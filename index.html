@@ -7,7 +7,14 @@
 <meta property="og:title" content="Šláfbír – expedice a fotky z cest">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://slafbir.cz/">
-<meta property="og:image" content="https://slafbir.cz/img/fil-07.jpg">
+<meta property="og:description" content="Expedice a fotky z cest: mapa 43 navštívených států, lety a minihry.">
+<meta property="og:site_name" content="Šláfbír">
+<meta property="og:locale" content="cs_CZ">
+<meta property="og:image" content="https://slafbir.cz/img/nahled.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Šláfbír – expedice a fotky z cest">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -345,6 +352,7 @@ fl-c.fl{animation:flipch .1s linear}
 .bar .zkus .wrap{display:block;padding-block:0}
 .zkus .kr{display:none}
 @media (max-width:560px){.zkus{font-size:.68rem;padding-block:5px}.zkus .dl{display:none}.zkus .kr{display:inline}}
+.zkus.spusteno{background:var(--accent);color:#fff}
 /* top bar */
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--paper)}
@@ -517,6 +525,15 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
   </nav>
 </div></header>
 
+<script>
+/* pruh nahoře: do 30. 11. zkušební provoz, v prosinci 2026 „spuštěno“, od 1. 1. 2027 zmizí (podle data v zařízení návštěvníka) */
+(() => { const z = document.querySelector('.bar .zkus'); if (!z) return;
+  const d = new Date(), t = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  if (t >= 20270101) z.remove();
+  else if (t >= 20261201) { z.classList.add('spusteno');
+    z.querySelector('.wrap').innerHTML = '<b>Spuštěno</b> <span class="dl">Stránky byly spuštěny 1. prosince 2026.</span><span class="kr">Stránky spuštěny 1. 12. 2026</span>'; }
+})();
+</script>
 <main id="app"></main>
 
 <footer><div class="wrap">
