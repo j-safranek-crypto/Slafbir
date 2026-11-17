@@ -173,6 +173,23 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .kamdal .kmap span{background:none}
 @media (max-width:760px){.kamdal{grid-template-columns:1fr}.kamdal a{min-height:150px}}
 .nav a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+/* oživení (jen bez omezení pohybu) */
+@media (prefers-reduced-motion:no-preference){
+  .stamp.ceka{opacity:0}
+  .stamp.bum{animation:dopad .55s cubic-bezier(.2,.9,.3,1.3) both}
+  @keyframes dopad{0%{opacity:0;transform:rotate(calc(var(--rot,-8deg) - 14deg)) scale(1.7)}60%{opacity:1;transform:rotate(calc(var(--rot,-8deg) + 2deg)) scale(.94)}100%{opacity:1;transform:rotate(var(--rot,-8deg)) scale(1)}}
+  .mapsvg .v.vyb{animation:vybarvi .7s ease both}
+  @keyframes vybarvi{from{fill:var(--land)}}
+  .mapsvg.fl .lety path,.mapsvg.fl .lety circle{animation:letnout .5s ease both}
+  @keyframes letnout{from{opacity:0}}
+  .hero .kb{animation:kb 12s ease-out both}
+  @keyframes kb{from{transform:scale(1.08)}to{transform:scale(1)}}
+  .album img.fi,.gallery figure:not(.skryte) img.fi{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
+  .album img.fi.on,.gallery figure:not(.skryte) img.fi.on{opacity:1;transform:none}
+}
+.hero{overflow:hidden}
+.hero img.dalsi{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.6s ease}
+.hero img.dalsi.on{opacity:1}
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
@@ -555,6 +572,63 @@ function pexesoPage(){
 
   </div></section>`;
 }
+/* oživení stránek */
+const ZIVE = (() => {
+  const klid = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let heroT = null, obs = [];
+  const stop = () => { clearInterval(heroT); heroT = null; obs.forEach(o => o.disconnect()); obs = []; };
+  function razitka(){
+    const st = [...document.querySelectorAll('.cards .exp .stamp')]; if (!st.length) return;
+    st.forEach(s => s.classList.add('ceka'));
+    let poradi = 0, reset = null;
+    const o = new IntersectionObserver(en => {
+      en.filter(e => e.isIntersecting).forEach(e => { const s = e.target; o.unobserve(s);
+        s.style.animationDelay = (poradi++ * 90) + 'ms'; s.classList.remove('ceka'); s.classList.add('bum'); });
+      clearTimeout(reset); reset = setTimeout(() => poradi = 0, 300);
+    }, {threshold: .4});
+    st.forEach(s => o.observe(s)); obs.push(o);
+  }
+  function mapa(){
+    const svg = document.querySelector('.mapsvg:not([hidden])'); if (!svg) return;
+    const v = [...svg.querySelectorAll('.v')].map(x => { let bx = 0; try { const b = x.getBBox(); bx = b.x + b.width / 2; } catch(e){} return [bx, x]; }).sort((a, b) => a[0] - b[0]);
+    const n = v.length; v.forEach(([, x], i) => { x.style.animationDelay = Math.round(i / n * 1600) + 'ms'; x.classList.add('vyb'); });
+  }
+  function lety(){
+    document.querySelectorAll('.mapsvg .lety').forEach(g => [...g.children].forEach((x, i) => x.style.animationDelay = Math.min(i * 40, 1400) + 'ms'));
+  }
+  function pocitadla(){
+    document.querySelectorAll('.stats b').forEach(b => {
+      const cil = b.textContent.trim(); if (!/^\d+$/.test(cil)) return;
+      const N = +cil, t0 = performance.now(), T = 900;
+      const krok = t => { const k = Math.min(1, (t - t0) / T); b.textContent = Math.round(N * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(krok); };
+      b.textContent = '0'; requestAnimationFrame(krok);
+    });
+  }
+  function hero(){
+    const h = document.querySelector('.hero'); if (!h) return;
+    const img = h.querySelector('img'), cr = h.querySelector('.credit');
+    const fotky = [D.hero, ...D.album.filter(p => p.f !== D.hero.f && p.w >= p.h)];
+    let i = 0; img.classList.add('kb');
+    heroT = setInterval(() => {
+      if (document.hidden) return;
+      i = (i + 1) % fotky.length; const p = fotky[i];
+      const n = new Image(); n.className = 'dalsi'; n.alt = p.cap; n.src = p.f;
+      n.onload = () => { h.insertBefore(n, h.querySelector('.credit'));
+        requestAnimationFrame(() => requestAnimationFrame(() => { n.classList.add('on', 'kb'); if (cr) cr.textContent = stripCountry(p.cap); }));
+        setTimeout(() => { h.querySelectorAll('img').forEach(x => { if (x !== n) x.remove(); }); }, 1800); };
+    }, 8000);
+  }
+  function fotky(){
+    const im = [...document.querySelectorAll('.album img, .gallery figure:not(.skryte) img')]; if (!im.length) return;
+    im.forEach(x => x.classList.add('fi'));
+    const o = new IntersectionObserver(en => en.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); o.unobserve(e.target); } }), {rootMargin: '0px 0px -40px 0px'});
+    im.forEach(x => o.observe(x)); obs.push(o);
+  }
+  return function zive(){
+    stop(); if (klid() || !('IntersectionObserver' in window)) return;
+    razitka(); mapa(); lety(); pocitadla(); hero(); fotky();
+  };
+})();
 /* partneři */
 function partneriPage(){
   return `<section class="partneri"><div class="wrap">
@@ -954,6 +1028,7 @@ function render(){
     if(h === 'lety'){ const t = document.getElementById('lety'); if(t) t.scrollIntoView(); } else window.scrollTo(0,0); }
   else if(h === 'album'){ app.innerHTML = albumPage(); current = D.album; window.scrollTo(0,0); }
   else { app.innerHTML = home(); current = []; window.scrollTo(0,0); }
+  ZIVE();
   const sekce = e ? 'expedice' : h === 'lety' ? 'staty' : h;
   document.querySelectorAll('.nav a').forEach(a => { if (a.getAttribute('href') === '#' + sekce) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
 }
