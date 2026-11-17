@@ -218,6 +218,14 @@ fl-c.fl{animation:flipch .1s linear}
 .loko .k1{left:4px}.loko .k2{left:30px}.loko .k3{left:52px}
 @media (prefers-reduced-motion:no-preference){.souprava.jede .loko .komin::after{content:"";position:absolute;left:-2px;top:-8px;width:12px;height:12px;border-radius:50%;background:var(--line);animation:kour 1.1s ease-out infinite}}
 @keyframes kour{0%{opacity:.9;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(-14px,-16px) scale(1.6)}}
+.vlak{user-select:none;-webkit-user-select:none}
+.vlak img{-webkit-user-drag:none;user-drag:none;pointer-events:none}
+.vlak.tah{cursor:grab;touch-action:pan-y}
+.vlak.tah.drzi{cursor:grabbing}
+.vlak-pod{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px;min-height:1.4em}
+.vlak-pod .stat{color:var(--ink)}
+.vlak-pod .tip{opacity:0;transition:opacity .4s}
+.vlak.tah + .vlak-pod .tip{opacity:1}
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
@@ -502,6 +510,7 @@ function statyPage(){
       <div class="mapinfo" id="mapInfo" aria-live="polite"><span class="label">Klepni na vybarvený stát</span></div>
     </div>
     <div class="vlak" id="vlak" aria-hidden="true"><div class="trat"></div></div>
+    <div class="vlak-pod" aria-live="polite"><span class="stat" id="vlakStat"></span><span class="tip">← Vláček můžeš posouvat →</span></div>
     <div class="cont">
       ${D.continents.map(([k,list]) => `<div><h3>${esc(k)}<small>${list.length}</small></h3><ul>${list.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`).join('')}
     </div>
@@ -657,16 +666,33 @@ function VLAK(poradi, krok){
   poradi = poradi || [...D.exp].reverse();
   const videno = new Set(), skupiny = poradi.map(e => short(e.countries).filter(c => D.vlajky[c] && !videno.has(c) && videno.add(c)));
   const vagony = skupiny.flat();
-  const html = `<div class="souprava"><div class="loko"><span class="kab"></span><img src="img/vlajky/cz.png" alt=""><span class="komin"></span><span class="nar"></span><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>${vagony.map(c => `<div class="vagon" title="${esc(c)}"><img src="img/vlajky/${D.vlajky[c]}.png" alt="${esc(c)}" decoding="async"></div>`).join('')}</div>`;
+  const html = `<div class="souprava"><div class="loko"><span class="kab"></span><img src="img/vlajky/cz.png" alt="" draggable="false"><span class="komin"></span><span class="nar"></span><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>${vagony.map(c => `<div class="vagon" title="${esc(c)}"><img src="img/vlajky/${D.vlajky[c]}.png" alt="${esc(c)}" decoding="async" draggable="false"></div>`).join('')}</div>`;
   box.querySelector('.souprava')?.remove(); box.insertAdjacentHTML('beforeend', html);
   const s = box.querySelector('.souprava'), W = s.scrollWidth, lok = s.querySelector('.loko').offsetWidth, vag = 44 + 6, sirka = box.clientWidth;
   const klid = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (klid || !krok) { s.style.transform = `translateX(${Math.min(0, sirka - W)}px)`; return; }
+  if (klid || !krok) { const xs = Math.min(0, sirka - W); s.style.transform = `translateX(${xs}px)`; tahani(box, s, xs, W); return; }
   const x0 = -W + lok + 8, x1 = x0 + vagony.length * vag, T = Math.round(poradi.length * krok) + 600;
   s.style.transform = `translateX(${x0}px)`; void s.offsetWidth;
   s.style.transition = `transform ${T}ms cubic-bezier(.35,0,.65,1)`; s.classList.add('jede');
   requestAnimationFrame(() => { s.style.transform = `translateX(${x1}px)`; });
-  setTimeout(() => s.classList.remove('jede'), T + 200);
+  setTimeout(() => { s.classList.remove('jede'); s.style.transition = ''; tahani(box, s, x1, W); }, T + 200);
+}
+/* posouvání vláčku myší nebo prstem; klepnutí na vagon ukáže název státu */
+function tahani(box, s, x, W){
+  const sirka = () => box.clientWidth, meze = v => Math.max(Math.min(0, sirka() - W), Math.min(0, v));
+  const stat = document.getElementById('vlakStat');
+  let start = null, x0 = x, posun = 0, rych = 0, tPosl = 0, xPosl = 0, raf = 0;
+  const nastav = v => { x = meze(v); s.style.transform = `translateX(${x}px)`; };
+  box.classList.add('tah');
+  box.onpointerdown = e => { cancelAnimationFrame(raf); start = e.clientX; x0 = x; posun = 0; rych = 0; tPosl = e.timeStamp; xPosl = e.clientX; box.classList.add('drzi'); box.setPointerCapture(e.pointerId); };
+  box.onpointermove = e => { if (start === null) return; const dx = e.clientX - start; posun = Math.max(posun, Math.abs(dx));
+    const dt = e.timeStamp - tPosl; if (dt > 0) rych = (e.clientX - xPosl) / dt; tPosl = e.timeStamp; xPosl = e.clientX; nastav(x0 + dx); };
+  const pust = e => { if (start === null) return; start = null; box.classList.remove('drzi');
+    if (posun < 6) { // klepnutí: název státu pod vláčkem
+      const el = document.elementsFromPoint(e.clientX, e.clientY).find(n => n.classList && (n.classList.contains('vagon') || n.classList.contains('loko')));
+      if (el && stat) stat.textContent = el.classList.contains('loko') ? 'Česko – domov' : el.title; return; }
+    let v = rych * 16; const setrv = () => { v *= .94; nastav(x + v); if (Math.abs(v) > .4) raf = requestAnimationFrame(setrv); }; raf = requestAnimationFrame(setrv); };
+  box.onpointerup = pust; box.onpointercancel = () => { start = null; box.classList.remove('drzi'); };
 }
 /* oživení stránek */
 const ZIVE = (() => {
