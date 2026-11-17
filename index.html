@@ -192,16 +192,22 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .podnav .nahoru{margin-left:auto}
 .partneri{padding-block:40px 24px}
 /* koutky: pivovar s dvanácti dvířky */
-.kt{--cihly:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='44'%20height='24'%3E%3Crect%20width='44'%20height='24'%20fill='%23e3d3bf'/%3E%3Crect%20x='1'%20y='1'%20width='20'%20height='10'%20fill='%23b85a3c'/%3E%3Crect%20x='23'%20y='1'%20width='20'%20height='10'%20fill='%23a94f33'/%3E%3Crect%20x='-10'%20y='13'%20width='20'%20height='10'%20fill='%23c26444'/%3E%3Crect%20x='12'%20y='13'%20width='20'%20height='10'%20fill='%23b85a3c'/%3E%3Crect%20x='34'%20y='13'%20width='20'%20height='10'%20fill='%23a94f33'/%3E%3C/svg%3E");--strecha:#7c2f22;--strecha2:#5f2219;--kamen:#ddd0b9;--drevo:#5b3a21;--drevo2:#4a2f1a;--mosaz:#d9a441;--cedule:#1f3a2c;padding-block:40px 56px}
+.kt{--plech:#4f6b62;--plech2:#2f433d;--cihly:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='44'%20height='24'%3E%3Crect%20width='44'%20height='24'%20fill='%23e3d3bf'/%3E%3Crect%20x='1'%20y='1'%20width='20'%20height='10'%20fill='%23b85a3c'/%3E%3Crect%20x='23'%20y='1'%20width='20'%20height='10'%20fill='%23a94f33'/%3E%3Crect%20x='-10'%20y='13'%20width='20'%20height='10'%20fill='%23c26444'/%3E%3Crect%20x='12'%20y='13'%20width='20'%20height='10'%20fill='%23b85a3c'/%3E%3Crect%20x='34'%20y='13'%20width='20'%20height='10'%20fill='%23a94f33'/%3E%3C/svg%3E");--strecha:#7c2f22;--strecha2:#5f2219;--kamen:#ddd0b9;--drevo:#5b3a21;--drevo2:#4a2f1a;--mosaz:#d9a441;--cedule:#1f3a2c;padding-block:40px 56px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .kt{--cihly:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='44'%20height='24'%3E%3Crect%20width='44'%20height='24'%20fill='%233a2c25'/%3E%3Crect%20x='1'%20y='1'%20width='20'%20height='10'%20fill='%236f3626'/%3E%3Crect%20x='23'%20y='1'%20width='20'%20height='10'%20fill='%2362301f'/%3E%3Crect%20x='-10'%20y='13'%20width='20'%20height='10'%20fill='%237a3c2a'/%3E%3Crect%20x='12'%20y='13'%20width='20'%20height='10'%20fill='%236f3626'/%3E%3Crect%20x='34'%20y='13'%20width='20'%20height='10'%20fill='%2362301f'/%3E%3C/svg%3E");--strecha:#4c1d15;--strecha2:#3a1610;--kamen:#7d7262;--cedule:#16291f}}
 :root[data-theme="dark"] .kt{--cihly:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='44'%20height='24'%3E%3Crect%20width='44'%20height='24'%20fill='%233a2c25'/%3E%3Crect%20x='1'%20y='1'%20width='20'%20height='10'%20fill='%236f3626'/%3E%3Crect%20x='23'%20y='1'%20width='20'%20height='10'%20fill='%2362301f'/%3E%3Crect%20x='-10'%20y='13'%20width='20'%20height='10'%20fill='%237a3c2a'/%3E%3Crect%20x='12'%20y='13'%20width='20'%20height='10'%20fill='%236f3626'/%3E%3Crect%20x='34'%20y='13'%20width='20'%20height='10'%20fill='%2362301f'/%3E%3C/svg%3E");--strecha:#4c1d15;--strecha2:#3a1610;--kamen:#7d7262;--cedule:#16291f}
 .kt h1{font-size:clamp(2.8rem,10vw,4.6rem);font-weight:900}
 .kt .intro{max-width:58ch;margin:8px 0 18px;color:var(--muted)}
-.kt .pivovar{position:relative;max-width:600px;margin:56px auto 0}
-.kt .komin{position:absolute;right:11%;top:-58px;width:30px;height:120px;background:var(--cihly);border-top:8px solid var(--kamen);z-index:0}
-.kt .komin i{position:absolute;left:4px;top:-18px;width:22px;height:22px;border-radius:50%;background:color-mix(in srgb,var(--muted) 45%,transparent);opacity:0}
-@media (prefers-reduced-motion: no-preference){.kt .komin i{animation:kour 7s linear infinite}.kt .komin i:nth-child(2){animation-delay:2.3s}.kt .komin i:nth-child(3){animation-delay:4.6s}}
-@keyframes kour{0%{transform:translate(0,0) scale(.6);opacity:0}12%{opacity:.8}100%{transform:translate(-26px,-90px) scale(2.4);opacity:0}}
+.kt .pivovar{position:relative;max-width:600px;margin:84px auto 0}
+/* hvozd (sušárna sladu) s hlavicí nahoře – typický znak pivovaru */
+.kt .komin{position:absolute;right:13%;top:-40px;width:clamp(42px,6vw,58px);height:110px;background:var(--cihly);box-shadow:inset 0 0 0 2px rgba(0,0,0,.12);z-index:0}
+.kt .komin .hlavice{position:absolute;left:50%;top:-32px;width:clamp(84px,14vw,116px);height:36px;transform:translateX(-50%)}
+.kt .komin .hlavice::before{content:"";position:absolute;left:0;right:0;top:0;height:20px;background:linear-gradient(90deg,var(--plech2),var(--plech) 45%,var(--plech2));clip-path:polygon(4% 100%,30% 22%,50% 0,70% 22%,96% 100%)}
+.kt .komin .hlavice::after{content:"";position:absolute;left:9%;right:9%;top:20px;height:16px;border-radius:2px 2px 7px 7px;background:repeating-linear-gradient(90deg,var(--plech2) 0 3px,var(--plech) 3px 9px);box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.kt .komin .korouhev{position:absolute;left:50%;top:-50px;width:2px;height:20px;background:var(--plech2)}
+.kt .komin .korouhev::after{content:"";position:absolute;left:2px;top:1px;width:14px;height:8px;background:var(--mosaz);clip-path:polygon(0 0,100% 50%,0 100%)}
+.kt .komin i{position:absolute;left:50%;top:-14px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:color-mix(in srgb,var(--muted) 40%,transparent);opacity:0}
+@media (prefers-reduced-motion: no-preference){.kt .komin i{animation:kourP 7s linear infinite}.kt .komin i:nth-child(2){animation-delay:2.3s}.kt .komin i:nth-child(3){animation-delay:4.6s}}
+@keyframes kourP{0%{transform:translate(0,0) scale(.6);opacity:0}12%{opacity:.7}100%{transform:translate(-30px,-80px) scale(2.4);opacity:0}}
 .kt .strecha{position:relative;z-index:1;height:clamp(64px,13vw,110px);margin:0 -14px;clip-path:polygon(0 100%,50% 0,100% 100%);background:repeating-linear-gradient(0deg,var(--strecha) 0 11px,var(--strecha2) 11px 13px);display:flex;align-items:flex-end;justify-content:center}
 .kt .strecha .oko{margin-bottom:clamp(8px,1.6vw,14px);width:clamp(34px,6vw,50px);aspect-ratio:1;border-radius:50%;background:var(--kamen);display:grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:clamp(.5rem,1.3vw,.68rem);color:#3b2a10;box-shadow:inset 0 0 0 3px #a8987d}
 .kt .fasada{position:relative;z-index:1;background:var(--cihly);padding:14px clamp(10px,3vw,26px) 0;border-left:6px solid var(--kamen);border-right:6px solid var(--kamen)}
@@ -210,7 +216,7 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .kt .cedule span{font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
 .kt .mriz{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
 @media (max-width:560px){.kt .mriz{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media (min-width:900px){.kt .pivovar{max-width:940px}.kt .mriz{grid-template-columns:repeat(6,minmax(0,1fr))}.kt .hlaska{max-width:940px}.kt .strecha{height:96px}.kt .komin{right:16%}}
+@media (min-width:900px){.kt .pivovar{max-width:940px}.kt .mriz{grid-template-columns:repeat(6,minmax(0,1fr))}.kt .hlaska{max-width:940px}.kt .strecha{height:96px}.kt .komin{right:17%}}
 .kt .bunka{display:flex;flex-direction:column;align-items:center;padding:6px 0 12px;border-bottom:7px solid var(--kamen);min-width:0}
 .kt .dv{position:relative;width:54%;aspect-ratio:3/4.6;perspective:700px;border-radius:50% 50% 2px 2px / 32% 32% 2px 2px;box-shadow:0 0 0 5px var(--kamen),0 0 0 6.5px rgba(0,0,0,.25)}
 @media (max-width:560px){.kt .dv{width:62%}}
@@ -1408,7 +1414,7 @@ function koutkyPage(){
     <h1>Koutky</h1>
     <p class="intro">Od ledna tu každý měsíc otevřeme jeden nový koutek, tematickou sbírku z cest. Za kterými dvířky co bude, prozradíme vždy týden předem.</p>
     <div class="pivovar">
-      <div class="komin" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="komin" aria-hidden="true"><i></i><i></i><i></i><span class="hlavice"></span><span class="korouhev"></span></div>
       <div class="strecha" aria-hidden="true"><span class="oko">2027</span></div>
       <div class="fasada">
         <div class="cedule"><b>Pivovar Koutky</b><span>Založeno 2027</span></div>
