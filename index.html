@@ -1426,11 +1426,11 @@ const LK = (() => {
     sipy(); $('dal').focus({preventScroll: true});
   }
   function hlaska(s){
-    if (s >= 88) return ['Robin Hood', 'Trefuješ se i se zavřenýma očima.'];
-    if (s >= 70) return ['Ostrostřelec', 'Na mapě se vyznáš líp než leckterý průvodce.'];
-    if (s >= 50) return ['Dobrá muška', 'Občas to uletělo, ale směr držíš.'];
-    if (s >= 30) return ['Zatoulaný šíp', 'Svět je velký. Zkus to jindy.'];
-    return ['Šíp v toulci', 'Možná příště radši pexeso?'];
+    if (s >= 88) return ['Lobečské', 'Máš natočeno Lobečské, zasloužil sis ho.'];
+    if (s >= 70) return ['Excelent', 'Excelentní výkon, proto piješ Excelent.'];
+    if (s >= 50) return ['Gambrinus', 'Vystřílel sis Gambrinus.'];
+    if (s >= 30) return ['Braník', 'Dostal ses jen na Braníka.'];
+    return ['Staropramen', 'Tady máš Staropramen.'];
   }
   function naZelenou(){
     const pouzite = new Set(kolo.map(m => m[0])), exp = new Set(kolo.map(m => m[5])), vyb = [], misto = new Set();
