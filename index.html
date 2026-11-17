@@ -176,6 +176,9 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
+.bar .zkus .wrap{display:block;padding-block:0}
+.zkus .kr{display:none}
+@media (max-width:560px){.zkus{font-size:.68rem;padding-block:5px}.zkus .dl{display:none}.zkus .kr{display:inline}}
 /* top bar */
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--paper)}
@@ -264,7 +267,7 @@ section.block{padding-block:56px 24px;scroll-margin-top:calc(env(safe-area-inset
 .mapsvg .lety path{fill:none;stroke:var(--stamp-a);stroke-linecap:round;opacity:.85;vector-effect:non-scaling-stroke;pointer-events:none}
 .mapsvg .lety circle{fill:var(--ink);stroke:var(--card);stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}
 .maptools .fltog{margin-left:6px}
-.flights{margin-top:36px;scroll-margin-top:calc(env(safe-area-inset-top,0px) + 64px);--board:#14181a;--flap:#22282b;--flap-hi:#2b3236;--seam:#0b0d0e;--amber:#f6c445;--flap-ink:#eef0ea;--board-muted:#8d9a9b;--go:#7fd39b}
+.flights{margin-top:36px;scroll-margin-top:calc(env(safe-area-inset-top,0px) + 110px);--board:#14181a;--flap:#22282b;--flap-hi:#2b3236;--seam:#0b0d0e;--amber:#f6c445;--flap-ink:#eef0ea;--board-muted:#8d9a9b;--go:#7fd39b}
 .flights h3{font-size:2rem;font-weight:800;margin-bottom:6px}
 .flnote{color:var(--muted);font-size:.92rem;max-width:44em;margin:0 0 14px}
 .board{background:var(--board);border-radius:6px;padding:14px 14px 12px;box-shadow:0 10px 30px rgba(0,0,0,.18);color:var(--flap-ink);font-family:var(--mono)}
@@ -338,11 +341,10 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
 @media (max-width:520px){.nav{gap:2px}.nav a{font-size:.66rem;letter-spacing:.02em;padding:7px 5px}}
 </style>
 
-<div class="zkus" role="note"><div class="wrap"><b>Zkušební provoz</b> Web se ještě ladí, naplno ho spustíme 1. 12. 2026.</div></div>
 
 </head>
 <body>
-<header class="bar"><div class="wrap">
+<header class="bar"><div class="zkus" role="note"><div class="wrap"><b>Zkušební provoz</b> <span class="dl">Web se ještě ladí, naplno ho spustíme 1. 12. 2026.</span><span class="kr">Naplno od 1. 12. 2026</span></div></div><div class="wrap">
   <a class="brand" href="#">Šláfbír</a>
   <nav class="nav" aria-label="Hlavní menu">
     <a href="#expedice">Expedice</a><a href="#staty">Státy</a><a href="#album">Fotoalbum</a><a href="#pexeso">Pexeso</a>
