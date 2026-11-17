@@ -147,6 +147,21 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .gallery .skryte img{filter:blur(16px) saturate(.7);transform:scale(1.15)}
 .gallery .skryte a > span{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:12px;background:rgba(10,20,22,.35);color:#fff;font-family:var(--mono);font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;line-height:1.5}
 .gallery .skryte a b{display:block;font-family:var(--display);font-size:1.5rem;letter-spacing:.02em}
+/* spodní lišta a partneři */
+.podnav{display:flex;flex-wrap:wrap;gap:4px 18px;align-items:center;margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.podnav a{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--muted);padding:6px 0}
+.podnav a:hover{color:var(--ink)}
+.podnav .nahoru{margin-left:auto}
+.partneri{padding-block:40px 24px}
+.partneri h1{font-size:clamp(2.8rem,10vw,4.6rem);font-weight:900}
+.partneri .intro{max-width:56ch;margin:8px 0 28px;color:var(--muted)}
+.partner{display:grid;grid-template-columns:150px minmax(0,1fr);gap:22px;align-items:start;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:20px;margin-bottom:16px}
+.partner .logo{display:grid;place-items:center;background:#fff;border-radius:3px;padding:10px;aspect-ratio:1}
+.partner .logo img{max-width:100%;max-height:130px;width:auto;height:auto;display:block}
+.partner h2{font-size:clamp(1.6rem,4.5vw,2.1rem);font-weight:800}
+.partner p{margin:8px 0 12px;max-width:62ch}
+.partner .odkaz{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--accent)}
+@media (max-width:560px){.partner{grid-template-columns:1fr}.partner .logo{max-width:160px;aspect-ratio:auto}}
 /* zkušební provoz */
 .zkus{background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.74rem;letter-spacing:.06em;text-align:center;padding-block:7px;line-height:1.45}
 .zkus b{letter-spacing:.14em;text-transform:uppercase;margin-right:6px}
@@ -330,6 +345,10 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
   <p class="contact">Kontakt: <a id="mail" href="#">e-mail</a></p>
   <p>Na většinu expedic jezdím se cestovatelem Slávkem Honzíkem. Fotky u jeho výprav jsou zatím z jeho webu <a href="https://slavekhonzik.cz" target="_blank" rel="noopener">slavekhonzik.cz</a>, postupně je nahradím svými.</p>
   <p class="label">Web nepoužívá cookies, návštěvnost se počítá anonymně.</p>
+  <nav class="podnav" aria-label="Další stránky">
+    <a href="#partneri">Partneři</a>
+    <a class="nahoru" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Nahoru ↑</a>
+  </nav>
 </div></footer>
 
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Fotografie">
@@ -499,6 +518,26 @@ function pexesoPage(){
     </div>
   </div>
 
+  </div></section>`;
+}
+/* partneři */
+function partneriPage(){
+  return `<section class="partneri"><div class="wrap">
+    <div class="label">Spolupráce</div>
+    <h1>Partneři</h1>
+    <p class="intro">Lidé a firmy, se kterými jezdím a spolupracuji.</p>
+    <article class="partner">
+      <a class="logo" href="https://slavekhonzik.cz" target="_blank" rel="noopener"><img src="img/partneri/gabreti.jpg" alt="Gabréti – logo expedic Slávka Honzíka" width="227" height="300" loading="lazy"></a>
+      <div><h2>Slávek Honzík</h2>
+        <p>Cestovatel, se kterým jezdím na většinu výprav. Pořádá gabrétské expedice, přednáší o cestování a na svém webu má fotky a zápisky ze všech cest.</p>
+        <a class="odkaz" href="https://slavekhonzik.cz" target="_blank" rel="noopener">slavekhonzik.cz →</a></div>
+    </article>
+    <article class="partner">
+      <a class="logo" href="https://www.alvarez.cz/" target="_blank" rel="noopener"><img src="img/partneri/alvarez.jpg" alt="Cestovní kancelář Alvarez – logo" width="300" height="251" loading="lazy"></a>
+      <div><h2>Cestovní kancelář Alvarez</h2>
+        <p>Stabilní česká cestovní kancelář s tradicí od roku 1992. Její zájezdy stojí na osobní zkušenosti a zaměřují se na poznání místa, kultury, lidí a tradic. V nabídce jsou jen poznávací zájezdy, a to takřka na všechny kontinenty, pro cestovatele, kterým nevadí trocha nepohodlí a nehledají luxusní hotely v přeplněných letoviscích.</p>
+        <a class="odkaz" href="https://www.alvarez.cz/" target="_blank" rel="noopener">alvarez.cz →</a></div>
+    </article>
   </div></section>`;
 }
 /* lukostřelba */
@@ -873,6 +912,7 @@ function render(){
   const e = D.exp.find(x=>x.id===h);
   if(e){ app.innerHTML = detail(h); current = pics(e); window.scrollTo(0,0); }
   else if(h === 'pexeso'){ app.innerHTML = pexesoPage(); current = []; PX(); window.scrollTo(0,0); }
+  else if(h === 'partneri'){ app.innerHTML = partneriPage(); current = []; window.scrollTo(0,0); }
   else if(h === 'lukostrelba'){ app.innerHTML = lukPage(); current = []; LK(); window.scrollTo(0,0); }
   else {
     app.innerHTML = home(); current = D.album; TB();
