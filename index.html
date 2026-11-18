@@ -1093,7 +1093,7 @@ function prejezd(box, s, sirka){
   const poloha = (x, y, sc, ms, kriv = 'ease') => { car.style.transition = ms ? `transform ${ms}ms ${kriv}` : 'none'; car.style.transform = `translate(${x}px,${y}px) scale(${sc})`; };
   // Malina přijede zezadu (shora, menší) a zastaví u zadní závory
   poloha(sx - 11, -34, .5, 0); void car.offsetWidth;
-  const tm = [setTimeout(() => poloha(sx - 11, 19, .62, 2600, 'cubic-bezier(.2,.6,.3,1)'), 600)];   // zastaví těsně nad vagony
+  const tm = [setTimeout(() => poloha(sx - 11, 33, .62, 2600, 'cubic-bezier(.2,.6,.3,1)'), 600)];   // zastaví těsně nad střechami vagonů
   let raf = 0, hotovo = false;
   const otevri = () => {
     hotovo = true; zav.forEach(z => z.classList.add('nahoru'));
@@ -1105,7 +1105,7 @@ function prejezd(box, s, sirka){
   };
   // čekat, až poslední vagon mine přejezd (při odjezdu vlaku)
   const hlid = () => { if (hotovo) return; const posl = s.querySelector('.souprava > :last-child'), b = box.getBoundingClientRect();
-    if (s.dataset.odjizdi && posl.getBoundingClientRect().left - b.left > sx + 46) { tm.push(setTimeout(otevri, 900)); return; }   // jen při odjezdu, nikdy dřív
+    if (posl.getBoundingClientRect().left - b.left > sx + 46) { tm.push(setTimeout(otevri, 900)); return; }   // až celý vlak mine přejezd (i když stojí za ním); měří se skutečná poloha na každém zařízení
     raf = requestAnimationFrame(hlid); };
   raf = requestAnimationFrame(hlid);
   const zrus = () => { tm.forEach(clearTimeout); cancelAnimationFrame(raf); };
@@ -1118,7 +1118,7 @@ function prejezdZnovu(box, s){
   let raf = 0, tm = 0;
   const tz = setTimeout(() => zav.forEach(z => z.classList.remove('nahoru')), 3000);   // po 3 s spadnou závory
   const hlid = () => { const posl = s.querySelector('.souprava > :last-child'), b = box.getBoundingClientRect();
-    if (s.dataset.odjizdi && posl.getBoundingClientRect().left - b.left > sx + 46) {
+    if (posl.getBoundingClientRect().left - b.left > sx + 46) {
       tm = setTimeout(() => { zav.forEach(z => z.classList.add('nahoru')); vys.classList.remove('zavreno'); vys.classList.add('otevreno'); }, 900); return; }
     raf = requestAnimationFrame(hlid); };
   raf = requestAnimationFrame(hlid);
@@ -2339,11 +2339,12 @@ function render(){
   else if(h === 'staty' || h === 'lety'){ app.innerHTML = statyPage(); current = []; TB(); if (matchMedia('(prefers-reduced-motion: reduce)').matches) VLAK();
     if(h === 'lety'){ const t = document.getElementById('lety'); if(t) t.scrollIntoView(); } else window.scrollTo(0,0); }
   else if(h === 'album'){ app.innerHTML = albumPage(); current = D.album; window.scrollTo(0,0); }
+  else if(window.STRANKY && STRANKY[h]){ const k = STRANKY[h]; app.innerHTML = k.page(); current = k.fotky || []; if (k.init) k.init(); window.scrollTo(0,0); }
   else if(window.KOUTEK && KOUTEK[h]){ const k = KOUTEK[h]; app.innerHTML = k.page(); current = k.fotky || []; if (k.init) k.init(); window.scrollTo(0,0); }
   else { app.innerHTML = home(); current = []; window.scrollTo(0,0); }
   RADKY();
   ZIVE(); GC.stranka();
-  const sekce = e ? 'expedice' : h === 'lety' ? 'staty' : h;
+  const sekce = e ? 'expedice' : h === 'lety' ? 'staty' : (window.SEKCE_NAV || {})[h] || h;
   document.querySelectorAll('.nav a').forEach(a => { if (a.getAttribute('href') === '#' + sekce) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
 }
 /* fotky po řádcích: zleva doprava, každá další do nejkratšího sloupce (CSS columns řadí po sloupcích) */
