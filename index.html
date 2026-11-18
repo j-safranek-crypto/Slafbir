@@ -674,6 +674,15 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
 .pz-hot{border-top:1px dashed var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px}
 .pz-hot pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:.78rem;line-height:1.5;background:var(--paper);border:1px solid var(--line);padding:12px;border-radius:3px;max-height:320px;overflow:auto}
 .pz-hot .kmail{font-family:var(--mono);font-size:1.05rem;color:var(--ink);word-break:break-all}
+.pz-krok{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;padding:10px 0;border-top:1px solid var(--line)}
+.pz-krok>div{min-width:0;display:flex;flex-direction:column;gap:4px}
+.pz-kc{width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-family:var(--mono);font-size:.75rem;font-weight:600}
+.pz-kl{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pz-krok .kmail{font-size:.95rem;word-break:normal;white-space:nowrap}
+.pz-kv{font-family:var(--mono);font-size:.95rem;color:var(--ink);overflow-wrap:anywhere}
+.pz-kop{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;padding:6px 9px;border-radius:3px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;white-space:nowrap}
+.pz-kop:hover{border-color:var(--ink)}
+@media (max-width:440px){.pz-krok{grid-template-columns:auto minmax(0,1fr)}.pz-krok .pz-kop{grid-column:2;justify-self:start}}
 .pz-tl{display:flex;gap:10px;flex-wrap:wrap}
 .pz-ok{font-size:.9rem;color:var(--muted);min-height:1.3em;margin:0}
 .pz-gdpr{font-size:.88rem;color:var(--muted);margin:14px 0 0}
@@ -1631,10 +1640,12 @@ function pozdravyPage(){
         <label class="pz-zaskrt"><input type="checkbox" id="pzS3"> Všichni, kdo jsou na fotce poznat, o tom vědí a se zveřejněním souhlasí. Nejsou na ní cizí lidé.</label>
         <button type="submit" class="pz-btn" id="pzPriprav" disabled>Připravit e-mail</button>
         <div class="pz-hot" id="pzHot" hidden>
-          <p style="margin:0">Pošlete tenhle text na adresu níže a <b>přiložte fotku</b>.</p>
-          <a class="kmail" id="pzMail" href="#">e-mail</a>
-          <pre id="pzNahled"></pre>
-          <div class="pz-tl"><a class="pz-btn" id="pzOtevri" href="#">Otevřít v e-mailu</a><button type="button" class="pz-btn vedl" id="pzKop">Zkopírovat text</button></div>
+          <p style="margin:0">E-mail je připravený. Tlačítkem ho otevřete rovnou v poště, nebo ho napište sami takhle:</p>
+          <div class="pz-tl"><a class="pz-btn" id="pzOtevri" href="#">Otevřít v e-mailu</a></div>
+          <div class="pz-krok"><span class="pz-kc">1</span><div><span class="pz-kl">Komu</span><a class="kmail" id="pzMail" href="#">e-mail</a></div><button type="button" class="pz-kop" data-k="mail">Kopírovat</button></div>
+          <div class="pz-krok"><span class="pz-kc">2</span><div><span class="pz-kl">Předmět</span><span class="pz-kv" id="pzPred"></span></div><button type="button" class="pz-kop" data-k="pred">Kopírovat</button></div>
+          <div class="pz-krok pz-krok-t"><span class="pz-kc">3</span><div><span class="pz-kl">Text zprávy</span><pre id="pzNahled"></pre></div><button type="button" class="pz-kop" data-k="telo">Kopírovat</button></div>
+          <div class="pz-krok"><span class="pz-kc">4</span><div><span class="pz-kl">Příloha</span><span><b>Přiložte fotku</b> a odešlete.</span></div></div>
           <p class="pz-ok" id="pzOk" aria-live="polite"></p>
         </div>
       </form>
@@ -1677,13 +1688,14 @@ function pozdravyInit(){
       '[x] Všichni, kdo jsou na fotce poznat, o tom vědí a se zveřejněním souhlasí. Nejsou na ní cizí lidé.', '',
       'Souhlas můžu kdykoli odvolat e-mailem, pohlednice pak bude do 7 dnů stažena.', '',
       'Fotku přikládám.'].join('\n');
-    const pred = 'Pozdrav z cest pro Šláfbír';
-    $('pzNahled').textContent = telo;
+    const pred = 'Pozdrav z cest pro slafbir.cz';
+    $('pzNahled').textContent = telo; $('pzPred').textContent = pred;
     const m = $('pzMail'); m.href = 'mailto:' + MAIL(); m.textContent = MAIL();
     $('pzOtevri').href = 'mailto:' + MAIL() + '?subject=' + encodeURIComponent(pred) + '&body=' + encodeURIComponent(telo);
     $('pzHot').hidden = false; $('pzOk').textContent = '';
-    $('pzKop').onclick = () => { const ok = () => $('pzOk').textContent = 'Text je zkopírovaný. Vložte ho do e-mailu a přiložte fotku.', ne = () => $('pzOk').textContent = 'Kopírování nejde, text označte a zkopírujte ručně.';
-      try { navigator.clipboard.writeText('Předmět: ' + pred + '\n\n' + telo).then(ok, ne); } catch(_) { ne(); } };
+    const CO = { mail: [MAIL(), 'Adresa je zkopírovaná.'], pred: [pred, 'Předmět je zkopírovaný.'], telo: [telo, 'Text je zkopírovaný. Vložte ho do e-mailu a přiložte fotku.'] };
+    document.querySelectorAll('.pz-kop').forEach(b => b.onclick = () => { const [co, hl] = CO[b.dataset.k], ne = () => $('pzOk').textContent = 'Kopírování nejde, označte text a zkopírujte ho ručně.';
+      try { navigator.clipboard.writeText(co).then(() => $('pzOk').textContent = hl, ne); } catch(_) { ne(); } });
     $('pzHot').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 }
