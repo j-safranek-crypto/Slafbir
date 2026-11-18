@@ -1034,7 +1034,7 @@ const KLAP = (() => {
 (() => { const b = document.getElementById('zvukPata'); if (b) { b.textContent = KLAP.popis(); b.setAttribute('aria-pressed', String(KLAP.je())); } })();
 /* vláček pod mapou: lokomotiva s českou vlajkou, vagony s vlajkami států v pořadí expedic */
 const soupravaHtml = zeme => `<div class="souprava"><div class="loko"><span class="kab"></span><img src="img/vlajky/cz.png" alt="" draggable="false"><span class="komin"></span><span class="nar"></span><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>${zeme.map(c => `<div class="vagon" title="${esc(c)}"><img src="img/vlajky/${D.vlajky[c]}.png" alt="${esc(c)}" decoding="async" draggable="false"></div>`).join('')}</div>`;
-function VLAK(poradi, krok){
+function VLAK(poradi, krok, naVagon){
   const box = document.getElementById('vlak'); if (!box) return;
   poradi = poradi || [...D.exp].reverse();
   const videno = new Set(), skupiny = poradi.map(e => short(e.countries).filter(c => D.vlajky[c] && !videno.has(c) && videno.add(c)));
@@ -1042,12 +1042,20 @@ function VLAK(poradi, krok){
   box.querySelector('.souprava')?.remove(); box.insertAdjacentHTML('beforeend', soupravaHtml(vagony));
   const s = box.querySelector('.souprava'), W = s.scrollWidth, lok = s.querySelector('.loko').offsetWidth, vag = 44 + 6, sirka = box.clientWidth;
   const klid = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (klid || !krok) { const xs = Math.min(0, sirka - W); s.style.transform = `translateX(${xs}px)`; tahani(box, s, xs, W); return; }
+  if (klid || !krok) { const xs = Math.min(0, sirka - W); s.style.transform = `translateX(${xs}px)`; tahani(box, s, xs, W); if (naVagon) vagony.forEach(naVagon); return; }
   const x0 = -W + lok + 8, x1 = x0 + vagony.length * vag, T = Math.round(poradi.length * krok) + 600;
   s.style.transform = `translateX(${x0}px)`; void s.offsetWidth;
   s.style.transition = `transform ${T}ms cubic-bezier(.35,0,.65,1)`; s.classList.add('jede');
   requestAnimationFrame(() => { s.style.transform = `translateX(${x1}px)`; });
   setTimeout(() => { s.classList.remove('jede'); s.style.transition = ''; tahani(box, s, x1, W); }, T + 200);
+  if (naVagon) {   // stát se na mapě vybarví, až se jeho vagón objeví
+    const vg = [...s.querySelectorAll('.vagon')].map((el, i) => ({ el, c: vagony[i] })), konec = performance.now() + T + 400;
+    const tik = () => { if (!box.isConnected) return;
+      const L = box.getBoundingClientRect().left + 6, dalsi = performance.now() > konec;
+      for (let i = vg.length - 1; i >= 0; i--) if (dalsi || vg[i].el.getBoundingClientRect().right > L) { naVagon(vg[i].c); vg.splice(i, 1); }
+      if (vg.length) requestAnimationFrame(tik); };
+    requestAnimationFrame(tik);
+  }
 }
 /* přejezd: výpravy, na které se jelo Malinou (Škoda Felicia) */
 const MALINA = new Set(['balkan', 'moldavia', 'skandinavia']);
@@ -1474,13 +1482,17 @@ const ZIVE = (() => {
   function mapa(){
     // státy se vybarví v pořadí expedic (od nejstarší) a pod mapou přijíždí vláček s vlajkami
     const svg = document.querySelector('.mapsvg:not([hidden])'); if (!svg) return;
-    const N = D.exp.length, krok = Math.min(320, 6500 / N), poradi = [...D.exp].reverse(), sk = {};
+    // stát s vlajkou ve vláčku se vybarví, až přijede jeho vagón; ostatní (USA, bez vlajky) podle pořadí expedic
+    const N = D.exp.length, krok = Math.min(320, 6500 / N), poradi = [...D.exp].reverse(), sk = {}, vag = {};
+    const sVlajkou = new Set(poradi.flatMap(e => short(e.countries).filter(c => D.vlajky[c])));
     svg.querySelectorAll('.v').forEach(x => {
-      const tr = tripsBy[x.dataset.cz] || []; const j = N - 1 - Math.max(...tr.map(e => D.exp.indexOf(e)), 0);
-      x.classList.add('pred'); (sk[j] = sk[j] || []).push(x);
+      x.classList.add('pred'); const cz = x.dataset.cz;
+      if (sVlajkou.has(cz)) { (vag[cz] = vag[cz] || []).push(x); return; }
+      const tr = tripsBy[cz] || []; const j = N - 1 - Math.max(...tr.map(e => D.exp.indexOf(e)), 0);
+      (sk[j] = sk[j] || []).push(x);
     });
     Object.entries(sk).forEach(([j, xs]) => setTimeout(() => xs.forEach(x => x.classList.remove('pred')), Math.round(j * krok) + 150));
-    VLAK(poradi, krok);
+    VLAK(poradi, krok, c => (vag[c] || []).forEach(x => x.classList.remove('pred')));
   }
   function lety(){
     document.querySelectorAll('.mapsvg .lety').forEach(g => [...g.children].forEach((x, i) => x.style.animationDelay = Math.min(i * 40, 1400) + 'ms'));
