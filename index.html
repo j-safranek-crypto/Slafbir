@@ -604,8 +604,10 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
 /* lightbox */
 .lb[hidden]{display:none!important}
 .lb{position:fixed;inset:0;z-index:50;background:rgba(6,12,14,.94);display:grid;grid-template-rows:1fr auto;padding:calc(env(safe-area-inset-top,0px) + 12px) max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(12px,env(safe-area-inset-left,0px))}
-.lb img{max-width:100%;max-height:100%;margin:auto;object-fit:contain;align-self:center;justify-self:center;min-height:0}
-.lb .cap{color:#e9eeec;font-family:var(--mono);font-size:.8rem;text-align:center;padding-top:10px}
+.lb .lbf{grid-row:1/-1;align-self:center;justify-self:center;margin:0;display:flex;flex-direction:column;max-width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.lb .lbf img{display:block;width:auto;height:auto;max-width:min(100%,calc(100vw - max(24px,env(safe-area-inset-left,0px) + env(safe-area-inset-right,0px) + 24px)));max-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px - 3.4rem);max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px - 3.4rem);border-radius:2px 2px 0 0}
+.lb .cap{width:0;min-width:100%;box-sizing:border-box;background:#fff;color:#141414;font-family:var(--mono);font-size:.82rem;line-height:1.35;text-align:left;padding:8px 12px;border-radius:0 0 2px 2px;display:flex;gap:12px;justify-content:space-between;align-items:baseline}
+.lb .cap .n{color:#6b6b6b;white-space:nowrap;flex:none}
 .lb button{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;width:48px;height:48px;border-radius:50%;font-size:1.5rem;cursor:pointer}
 .lb .x{top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px,env(safe-area-inset-right,0px))}
 .lb .pv{left:max(12px,env(safe-area-inset-left,0px));top:50%}
@@ -779,8 +781,7 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
 </div></footer>
 
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Fotografie">
-  <img id="lbImg" alt="">
-  <div class="cap" id="lbCap"></div>
+  <figure class="lbf"><img id="lbImg" alt=""><figcaption class="cap" id="lbCap"></figcaption></figure>
   <button class="x" id="lbX" aria-label="Zavřít">×</button>
   <button class="pv" id="lbP" aria-label="Předchozí">‹</button>
   <button class="nx" id="lbN" aria-label="Další">›</button>
@@ -2367,7 +2368,7 @@ render();
 /* lightbox */
 const lb = document.getElementById('lb'), lbImg = document.getElementById('lbImg'), lbCap = document.getElementById('lbCap');
 let idx = 0;
-function show(i){ idx = (i + current.length) % current.length; const p = current[idx]; lbImg.src = p.f; lbImg.alt = p.cap; lbCap.textContent = `${p.cap}  ·  ${idx+1} / ${current.length}`; }
+function show(i){ idx = (i + current.length) % current.length; const p = current[idx]; lbImg.src = p.f; lbImg.alt = p.cap; lbCap.innerHTML = `<span>${esc(p.cap)}</span><span class="n">${idx+1} / ${current.length}</span>`; }
 app.addEventListener('click', ev => { const b = ev.target.closest('button[data-i]'); if(!b) return; show(+b.dataset.i); lb.hidden = false; document.getElementById('lbX').focus(); });
 document.getElementById('lbX').onclick = () => lb.hidden = true;
 document.getElementById('lbP').onclick = () => show(idx-1);
