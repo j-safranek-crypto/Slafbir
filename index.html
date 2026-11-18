@@ -609,7 +609,7 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
 .lb .nx{right:max(12px,env(safe-area-inset-right,0px));top:50%}
 @media (prefers-reduced-motion:reduce){.exp{transition:none}.exp:hover{transform:none}}
 @media (max-width:520px){.nav{gap:2px}.nav a{font-size:.66rem;letter-spacing:.02em;padding:7px 5px}}
-/* ===== Pozdravy z cest: pohlednice od spolucestovatelů ===== */
+/* ===== Pozdravy z cest: pohlednice od cestovatelů ===== */
 :root{--pz-papir:#fbf6ea;--pz-linka:#d9cdb3;--pz-inkoust:#1d3a6e;--pz-tisk:#5b5040;--pz-razitko:rgba(120,40,30,.62);--pz-schranka:#e39a1c;--pz-schranka2:#b8770c;--pz-handw:"Caveat","Segoe Print","Bradley Hand",cursive}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--pz-papir:#e8e0cc;--pz-linka:#c4b697;--pz-schranka:#d08c17;--pz-schranka2:#9c6409}}
 :root[data-theme="dark"]{--pz-papir:#e8e0cc;--pz-linka:#c4b697;--pz-schranka:#d08c17;--pz-schranka2:#9c6409}
@@ -1555,7 +1555,7 @@ function kontaktInit(){
   b.onclick = () => { const hot = () => { ok.textContent = 'Adresa je zkopírovaná.'; };
     try { navigator.clipboard.writeText(MAIL()).then(hot, () => { ok.textContent = 'Kopírování nejde, adresu označ a zkopíruj ručně.'; }); } catch(e) { ok.textContent = 'Kopírování nejde, adresu označ a zkopíruj ručně.'; } };
 }
-/* POZDRAVY Z CEST – pohlednice od spolucestovatelů. Data: pozdravy.json (build.py -> D.pozdravy), fotky přidává pozdravy/pridat.py (bez GPS).
+/* POZDRAVY Z CEST – pohlednice od cestovatelů. Data: pozdravy.json (build.py -> D.pozdravy), fotky přidává pozdravy/pridat.py (bez GPS).
    Pohlednice: f, w, h, popisek = text pod fotkou, text = pozdrav, podpis = kdo zdraví ('' = Anonymní pozdrav), foto = kdo fotil ('' = autor anonymní),
    kde = razítko (nepovinné), znamka = { hodnota: cena pohlednice do Evropy podle tamní pošty, stat: název státu na známce } (jen když je známé odkud) */
 const PZ_MAX = { popisek: 40, text: 160, podpis: 30, foto: 30, kde: 30 };
@@ -1587,9 +1587,9 @@ function pzPohlednice(p, i){
 
 function pozdravyPage(){
   return `<section class="pz"><div class="wrap">
-    <div class="label">Od spolucestovatelů</div>
+    <div class="label">Od cestovatelů</div>
     <h1>Pozdravy z cest</h1>
-    <p class="intro">Pohlednice, které mi poslali lidé, se kterými jsem cestoval, z jejich vlastních výprav. Fotky jsou jejich, ne moje, a u každé je napsané, kdo ji fotil.${D.pozdravy.length ? ' Klepnutím pohlednici otočíte.' : ''}</p>
+    <p class="intro">Pohlednice od lidí, kteří rádi cestují: od kamarádů, se kterými jsem jezdil, i od těch, které jsem nikdy nepotkal. Každý tu může ukázat kousek ze své cesty. Fotky jsou jejich, ne moje, a u každé je napsané, kdo ji fotil.${D.pozdravy.length ? ' Klepnutím pohlednici otočíte.' : ''}</p>
     <div class="pz-sch">
       <button type="button" class="schranka" id="pzSchranka" aria-expanded="false" aria-controls="pzOkno" aria-label="Poslat pozdrav">
         <span class="sch-dopis" aria-hidden="true"></span>
@@ -1598,7 +1598,7 @@ function pozdravyPage(){
         <span class="sch-noha" aria-hidden="true"></span>
       </button>
       <div class="pz-sch-txt"><h2>Pošlete pozdrav</h2>
-        <p>Cestovali jsme spolu a teď jste někde sami? Hoďte mi pohlednici do schránky. Klepněte na ni a otevře se.</p></div>
+        <p>Jste zrovna na cestách, právě se z nich vracíte, nebo jste někde byli dřív? Pošlete pohlednici a ukažte ostatním, kam vás cesty zavedly. Klepněte na schránku a otevře se.</p></div>
     </div>
     <div class="pz-okno" id="pzOkno" hidden>
       <div>
