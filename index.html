@@ -449,6 +449,7 @@ fl-c.fl{animation:flipch .1s linear}
 @media (max-width:560px){.zkus{font-size:.68rem;padding-block:5px}.zkus .dl{display:none}.zkus .kr{display:inline}}
 .zkus.spusteno{background:var(--accent);color:#fff}
 /* top bar */
+html.v-koutku .bar,html.v-koutku body>footer{display:none}
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--paper)}
 .bar .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:10px;flex-wrap:wrap}
@@ -1483,6 +1484,21 @@ function vstupDvermi(dv, cil){
     requestAnimationFrame(() => ov.classList.add('mizi')); setTimeout(() => ov.remove(), 800);
   }, 850);
 }
+// odchod z koutku: obrazovka se rozzáří, objeví se pivovar a světlo se stáhne zpátky do dvířek, ze kterých člověk vyšel
+function odchodZKoutku(id){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.hash = 'koutky'; return; }
+  const ov = document.createElement('div'); ov.className = 'kt-vstup roste'; ov.style.opacity = '0'; document.body.appendChild(ov);
+  requestAnimationFrame(() => requestAnimationFrame(() => { ov.style.opacity = '1'; }));
+  setTimeout(() => {
+    location.hash = 'koutky';
+    setTimeout(() => {
+      const i = KOUTKY.findIndex(k => k.id === id), dv = document.querySelector(`.kt .dv[data-i="${i}"]`);
+      if (dv) { dv.classList.add('dokoran'); dv.scrollIntoView({ block: 'center' }); const r = dv.getBoundingClientRect();
+        ov.classList.remove('roste'); Object.assign(ov.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); }
+      setTimeout(() => { ov.style.opacity = '0'; setTimeout(() => ov.remove(), 700); }, dv ? 750 : 0);
+    }, 60);
+  }, 600);
+}
 function koutkyInit(){
   const hl = document.getElementById('ktHl');
   document.querySelectorAll('.kt .dv').forEach(d => { const k = KOUTKY[+d.dataset.i], s = koutekStav(k);
@@ -2020,6 +2036,7 @@ const GC = (() => {
 })();
 function render(){
   const h = location.hash.slice(1);
+  document.documentElement.classList.toggle('v-koutku', !!(window.KOUTEK && KOUTEK[h]));   // v koutku bez lišty a patičky
   const e = D.exp.find(x=>x.id===h);
   if(e){ app.innerHTML = detail(h); current = pics(e); window.scrollTo(0,0); vlakExpedice(e); letMapa(e); }
   else if(h === 'pexeso'){ app.innerHTML = pexesoPage(); current = []; PX(); window.scrollTo(0,0); }
