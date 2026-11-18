@@ -589,6 +589,9 @@ figure{margin:0}
 .dmeta{margin-top:10px;font-size:1.05rem}
 .dmeta p{max-width:40em;margin:.5em 0 0}
 .gallery{columns:3 260px;column-gap:14px;padding-block:24px}
+.gallery.ms,.album.ms{columns:auto;display:flex;align-items:flex-start}
+.gallery.ms{gap:14px}.album.ms{gap:12px}
+.ms > .sl{flex:1 1 0;min-width:0}
 .pager{display:flex;justify-content:space-between;gap:12px;padding-block:20px 8px;border-top:1px solid var(--line);flex-wrap:wrap}
 .pager a{text-decoration:none;font-family:var(--display);font-weight:800;font-size:1.4rem;text-transform:uppercase}
 .pager a span{display:block;font-family:var(--mono);font-size:.7rem;font-weight:500;color:var(--muted);letter-spacing:.1em}
@@ -2325,10 +2328,27 @@ function render(){
   else if(h === 'album'){ app.innerHTML = albumPage(); current = D.album; window.scrollTo(0,0); }
   else if(window.KOUTEK && KOUTEK[h]){ const k = KOUTEK[h]; app.innerHTML = k.page(); current = k.fotky || []; if (k.init) k.init(); window.scrollTo(0,0); }
   else { app.innerHTML = home(); current = []; window.scrollTo(0,0); }
+  RADKY();
   ZIVE(); GC.stranka();
   const sekce = e ? 'expedice' : h === 'lety' ? 'staty' : h;
   document.querySelectorAll('.nav a').forEach(a => { if (a.getAttribute('href') === '#' + sekce) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
 }
+/* fotky po řádcích: zleva doprava, každá další do nejkratšího sloupce (CSS columns řadí po sloupcích) */
+function RADKY(){
+  document.querySelectorAll('.gallery, .album').forEach(el => {
+    const alb = el.classList.contains('album'), gap = alb ? 12 : 14, minW = alb ? 220 : 260, max = alb ? 4 : 3;
+    if (!el._fig) el._fig = [...el.querySelectorAll(':scope > figure')];
+    const W = el.clientWidth || el.parentNode.clientWidth, n = Math.max(1, Math.min(max, Math.floor((W + gap) / (minW + gap))));
+    if (el._n === n) return; el._n = n;
+    const cw = (W - gap * (n - 1)) / n, vys = new Array(n).fill(0), sl = [];
+    for (let i = 0; i < n; i++) { const d = document.createElement('div'); d.className = 'sl'; sl.push(d); }
+    el._fig.forEach(f => { const im = f.querySelector('img,video'), w = +im?.getAttribute('width') || 4, h = +im?.getAttribute('height') || 3;
+      let k = 0; for (let i = 1; i < n; i++) if (vys[i] < vys[k] - 1) k = i;
+      sl[k].appendChild(f); vys[k] += cw * h / w + 34; });
+    el.replaceChildren(...sl); el.classList.add('ms');
+  });
+}
+let radkyT; addEventListener('resize', () => { clearTimeout(radkyT); radkyT = setTimeout(RADKY, 120); });
 window.addEventListener('hashchange', render);
 render();
 
