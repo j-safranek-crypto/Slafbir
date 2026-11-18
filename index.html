@@ -273,6 +273,10 @@ h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.01e
 .kt .sud::after{content:"";position:absolute;right:-3px;top:4%;width:30%;height:92%;border-radius:50%;background:radial-gradient(circle,#a0703f 0 30%,#7a5130 31% 38%,#a0703f 39% 62%,#3a2617 64%)}
 .kt .sud.s1{left:3%}.kt .sud.s2{right:5%}
 .kt .hlaska{min-height:1.5em;margin:18px auto 0;max-width:600px;font-family:var(--mono);font-size:.82rem;color:var(--muted)}
+.kt-vstup{position:fixed;z-index:300;pointer-events:none;border-radius:50% 50% 2px 2px / 32% 32% 2px 2px;background:radial-gradient(circle at 50% 60%,#fff2c8,#ffe39a 25%,#f2b13c 70%,#b8741a);box-shadow:0 0 40px 10px rgba(255,200,90,.6);transition:left .85s cubic-bezier(.65,0,.35,1),top .85s cubic-bezier(.65,0,.35,1),width .85s cubic-bezier(.65,0,.35,1),height .85s cubic-bezier(.65,0,.35,1),border-radius .85s,opacity .7s ease}
+.kt-vstup.roste{left:-15vw!important;top:-15vh!important;width:130vw!important;height:130vh!important;border-radius:0}
+.kt-vstup.mizi{opacity:0}
+#app.kt-zoom{transition:transform .85s cubic-bezier(.65,0,.35,1),opacity .85s;transform:scale(2.6);opacity:.3}
 .kt .pozn{font-size:.92rem;color:var(--muted);max-width:70ch;border-top:1px solid var(--line);padding-top:16px;margin:28px 0 0}
 @media (prefers-reduced-motion: reduce){.kt .kridlo{transition:none}.kt .dv.trese .kridlo,.kt .kridlo .klika{animation:none!important}}
 
@@ -1466,11 +1470,25 @@ function koutkyPage(){
     <p class="pozn">Dvířka se otevírají vždy prvního dne v měsíci. Kdo vydrží celý rok, toho na konci čeká bonus.</p>
   </div></section>`;
 }
+// vstup do koutku: světlo z otevřených dvířek zaplní obrazovku, stránka se k nim přiblíží, pak se otevře koutek
+function vstupDvermi(dv, cil){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { location.hash = cil; return; }
+  const r = dv.getBoundingClientRect(), app = document.getElementById('app'), ov = document.createElement('div');
+  ov.className = 'kt-vstup'; Object.assign(ov.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+  document.body.appendChild(ov); document.documentElement.style.overflow = 'hidden';
+  app.style.transformOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2 + scrollY}px`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { ov.classList.add('roste'); app.classList.add('kt-zoom'); }));
+  setTimeout(() => {
+    app.classList.remove('kt-zoom'); app.style.transformOrigin = ''; document.documentElement.style.overflow = ''; location.hash = cil;
+    requestAnimationFrame(() => ov.classList.add('mizi')); setTimeout(() => ov.remove(), 800);
+  }, 850);
+}
 function koutkyInit(){
   const hl = document.getElementById('ktHl');
   document.querySelectorAll('.kt .dv').forEach(d => { const k = KOUTKY[+d.dataset.i], s = koutekStav(k);
     const kr = d.querySelector('.kridlo'), a = d.querySelector('a.zaDv');
-    if (a && KT_UK) a.onclick = e => { e.preventDefault(); hl.textContent = `Ukázka: tady se vstoupí do „${k.cely || k.nazev}“.`; };
+    if (a && KT_UK && !(window.KOUTEK && KOUTEK[k.id])) a.onclick = e => { e.preventDefault(); hl.textContent = `Ukázka: tady se vstoupí do „${k.cely || k.nazev}“.`; };
+    else if (a) a.onclick = e => { e.preventDefault(); vstupDvermi(d, k.id); };
     kr.onclick = () => {
       if (s === 'otevreno') { d.classList.add('dokoran'); kr.tabIndex = -1; a.tabIndex = 0; setTimeout(() => a.focus({ preventScroll: true }), 900); hl.textContent = `${MESICE[k.mesic - 1][0].toUpperCase() + MESICE[k.mesic - 1].slice(1)}: ${k.cely || k.nazev}. Vstupte dál.`; return; }
       d.classList.remove('trese'); void d.offsetWidth; d.classList.add('trese');
@@ -2013,6 +2031,7 @@ function render(){
   else if(h === 'staty' || h === 'lety'){ app.innerHTML = statyPage(); current = []; TB(); if (matchMedia('(prefers-reduced-motion: reduce)').matches) VLAK();
     if(h === 'lety'){ const t = document.getElementById('lety'); if(t) t.scrollIntoView(); } else window.scrollTo(0,0); }
   else if(h === 'album'){ app.innerHTML = albumPage(); current = D.album; window.scrollTo(0,0); }
+  else if(window.KOUTEK && KOUTEK[h]){ const k = KOUTEK[h]; app.innerHTML = k.page(); current = k.fotky || []; if (k.init) k.init(); window.scrollTo(0,0); }
   else { app.innerHTML = home(); current = []; window.scrollTo(0,0); }
   ZIVE(); GC.stranka();
   const sekce = e ? 'expedice' : h === 'lety' ? 'staty' : h;
