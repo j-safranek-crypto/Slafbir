@@ -1724,7 +1724,7 @@ const KOUTKY = [
 ];
 const MESICE = ['leden','únor','březen','duben','květen','červen','červenec','srpen','září','říjen','listopad','prosinec'];
 const MESICE2 = ['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'];
-/* nazev = krátký na cedulku (Pivní), cely = celý uvnitř dvířek (Pivní koutek); bez cely se použije nazev */
+/* nazev = krátký na cedulku, cely = celý název uvnitř dvířek; bez cely se použije nazev */
 /* ukázka jen pro náhled: window.KT_UKAZKA = {ted:'RRRR-MM-DD', nazvy:{mesic:[nazev,id,cely]}}; na webu není */
 const KT_UK = window.KT_UKAZKA || null;
 if (KT_UK) Object.entries(KT_UK.nazvy || {}).forEach(([m, [n, id, c]]) => Object.assign(KOUTKY[m - 1], { nazev: n, id: id || null, cely: c || null }));
