@@ -990,6 +990,7 @@ const KLAP = (() => {
   let on = false; try { on = localStorage.getItem(KEY) === '1'; } catch(e){}
   let ctx = null, buf = null, posl = 0;
   const pripravit = () => { if (ctx) return; const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch(e){}   // iPhone: hrát i s přepínačem ticha
     ctx = new AC(); buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * .03), ctx.sampleRate);
     const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 6); };
   function klik(){
@@ -1005,7 +1006,10 @@ const KLAP = (() => {
     if (on) { pripravit(); if (ctx && ctx.state === 'suspended') ctx.resume(); klik(); }
     document.querySelectorAll('.zvuk').forEach(b => { b.textContent = popis(); b.setAttribute('aria-pressed', String(on)); }); }
   // prohlížeč pustí zvuk až po prvním klepnutí návštěvníka
-  ['pointerdown','keydown'].forEach(ev => document.addEventListener(ev, () => { if (on) { pripravit(); if (ctx && ctx.state === 'suspended') ctx.resume(); } }, {passive: true}));
+  // na dotykových zařízeních zvuk „odemkne“ až konec dotyku (pointerup/touchend/click), ne pointerdown
+  const odemkni = () => { if (!on) return; pripravit(); if (!ctx) return; if (ctx.state !== 'running') ctx.resume();
+    try { const s = ctx.createBufferSource(); s.buffer = ctx.createBuffer(1, 1, ctx.sampleRate); s.connect(ctx.destination); s.start(0); } catch(e){} };
+  ['pointerdown','pointerup','touchend','click','keydown'].forEach(ev => document.addEventListener(ev, odemkni, {passive: true, capture: true}));
   document.addEventListener('click', e => { const b = e.target.closest('.zvuk'); if (b) prepni(); });
   const ZN = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', CI = '0123456789';
   // překlopí text prvku jako stará nádražní tabule: každý znak projde řadou písmen/číslic až k cíli
@@ -1030,7 +1034,7 @@ const KLAP = (() => {
     });
     if (hotovo === ch.length) el.textContent = cil;
   }
-  return {klik, preklop, popis, je: () => on};
+  return {klik, preklop, popis, je: () => on, ctx: () => { pripravit(); return ctx; }};
 })();
 (() => { const b = document.getElementById('zvukPata'); if (b) { b.textContent = KLAP.popis(); b.setAttribute('aria-pressed', String(KLAP.je())); } })();
 /* vláček pod mapou: lokomotiva s českou vlajkou, vagony s vlajkami států v pořadí expedic */
