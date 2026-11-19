@@ -775,7 +775,7 @@ footer .contact a{font-family:var(--mono);font-size:.95rem}
     <a href="#partneri">Partneři</a>
     <a href="#kontakt">Kontakt</a>
     <a href="#koutky" class="pn-koutky" hidden>Koutky</a>
-    <button type="button" class="zvuk" id="zvukPata">Zvuk tabulí: vyp</button>
+    <button type="button" class="zvuk" id="zvukPata">Zvuk: vypnuto</button>
     <a class="nahoru" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Nahoru ↑</a>
   </nav>
 </div></footer>
@@ -1000,7 +1000,7 @@ const KLAP = (() => {
     const g = ctx.createGain(); g.gain.value = .35;
     s.connect(f).connect(g).connect(ctx.destination); s.start(t);
   }
-  const popis = () => on ? 'Zvuk tabulí: zap' : 'Zvuk tabulí: vyp';
+  const popis = () => on ? 'Zvuk: zapnuto' : 'Zvuk: vypnuto';
   function prepni(){ on = !on; try { localStorage.setItem(KEY, on ? '1' : '0'); } catch(e){}
     if (on) { pripravit(); if (ctx && ctx.state === 'suspended') ctx.resume(); klik(); }
     document.querySelectorAll('.zvuk').forEach(b => { b.textContent = popis(); b.setAttribute('aria-pressed', String(on)); }); }
